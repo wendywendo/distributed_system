@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.drinksproject.LoginController">
+   <children>
+      <!-- Background Container -->
+      <VBox alignment="CENTER" prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: linear-gradient(to bottom right, #f0f9ff, #e0e7ff);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+
+            <!-- Login Card -->
+            <VBox alignment="CENTER" maxWidth="400.0" prefWidth="400.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+               <padding>
+                  <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+               </padding>
+               <children>
+                  <!-- Login Header -->
+                  <VBox alignment="CENTER" spacing="5.0">
+                     <children>
+                        <HBox alignment="CENTER" spacing="10.0">
+                           <children>
+                              <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/cocktail.png" />
+                                 </image>
+                              </ImageView>
+                              <Label text="Lemonade Farm" textFill="#1f2937">
+                                 <font>
+                                    <Font name="System Bold" size="20.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label text="Access your branch dashboard" textFill="#6b7280">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+
+                  <!-- Login Form -->
+                  <VBox spacing="15.0">
+                     <children>
+                        <!-- Branch Selection -->
+                        <VBox spacing="5.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@images/location.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Label text="Branch Location" textFill="#374151">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <ChoiceBox fx:id="branchComboBox" prefWidth="340.0" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5;">
+                                 <items>
+<!--                                    <fx:include source="branch-items.fxml" />-->
+                                 </items>
+                              </ChoiceBox>
+                           </children>
+                        </VBox>
+
+                        <!-- Username Field -->
+                        <VBox spacing="5.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@images/user.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Label text="Username" textFill="#374151">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <TextField prefWidth="340.0" promptText="Enter your username" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
+                           </children>
+                        </VBox>
+
+                        <!-- Password Field -->
+                        <VBox spacing="5.0">
+                           <children>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@images/password.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Label text="Password" textFill="#374151">
+                                       <font>
+                                          <Font name="System Bold" size="12.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT">
+                                 <children>
+                                    <PasswordField prefHeight="40.0" prefWidth="340.0" promptText="Enter your password" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+
+                        <!-- Status Message -->
+                        <Label fx:id="statusLabel" textFill="#dc2626" visible="false" wrapText="true">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </Label>
+
+                        <!-- Login Button -->
+                        <Button fx:id="loginButton" mnemonicParsing="false" onAction="#onSubmit" prefHeight="45.0" prefWidth="340.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Sign In">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane style="-fx-background-color: linear-gradient(to bottom right, #f0f9ff, #e0e7ff);" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.drinksproject.DashboardController">
+    <children>
+        <!-- Header Section -->
+        <VBox alignment="CENTER" style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <children>
+                <HBox alignment="CENTER_LEFT" prefWidth="1000.0" spacing="20.0">
+                    <children>
+                        <Label text="🏢 NAKURU BRANCH" textFill="#1f2937">
+                            <font>
+                                <Font name="System Bold" size="24.0" />
+                            </font>
+                        </Label>
+                        <Separator orientation="VERTICAL" prefHeight="30.0" />
+                        <Label text="Drink Sales Management Dashboard" textFill="#6b7280">
+                            <font>
+                                <Font size="16.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <padding>
+                        <Insets left="30.0" right="30.0" />
+                    </padding>
+                </HBox>
+            </children>
+        </VBox>
+
+        <!-- Main Content Area -->
+        <TabPane fx:id="tabPane" layoutY="80.0" prefHeight="620.0" prefWidth="1000.0" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80.0">
+            <tabs>
+                <!-- Dashboard Tab -->
+                <Tab style="-fx-background-color: white;" text="📊 Dashboard">
+                    <content>
+                        <AnchorPane style="-fx-background-color: transparent;">
+                            <children>
+                                <VBox alignment="TOP_CENTER" prefHeight="548.0" prefWidth="997.0" spacing="30.0" AnchorPane.bottomAnchor="63.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <!-- Welcome Section -->
+                                        <VBox alignment="CENTER" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="📈 Branch Dashboard Overview" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="20.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label text="Monitor your branch performance and daily operations" textFill="#6b7280">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <!-- Stats Cards -->
+                                        <HBox alignment="CENTER" spacing="30.0">
+                                            <children>
+                                                <!-- Today's Sales Card -->
+                                                <VBox alignment="CENTER" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                                    <children>
+                                                        <Label text="💰" textFill="#059669">
+                                                            <font>
+                                                                <Font size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Today's Sales" textFill="#6b7280">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="todaySalesLabel" text="Ksh. 15,750" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <!-- Orders Count Card -->
+                                                <VBox alignment="CENTER" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                                    <children>
+                                                        <Label text="📦" textFill="#2563eb">
+                                                            <font>
+                                                                <Font size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Orders Today" textFill="#6b7280">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="ordersCountLabel" text="23" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <!-- Customers Card -->
+                                                <VBox alignment="CENTER" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                                    <children>
+                                                        <Label text="👥" textFill="#7c3aed">
+                                                            <font>
+                                                                <Font size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Total Customers" textFill="#6b7280">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="customersCountLabel" text="127" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Quick Actions -->
+                                        <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="⚡ Quick Actions" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <HBox fx:id="quickActions" alignment="CENTER" spacing="20.0">
+                                                    <children>
+                                                        <Button mnemonicParsing="false" onAction="#goToAddOrder" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="📝 New Order">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Button>
+                                                        <Button mnemonicParsing="false" onAction="#goToAddCustomer" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="👤 Add Customer">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Button>
+                                                        <Button fx:id="viewReportsLink" mnemonicParsing="false" onAction="#goToViewReports" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #7c3aed; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="📊 View Reports">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+                              <Button mnemonicParsing="false" onAction="#logout" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Logout">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Button>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+
+                <!-- Orders Tab -->
+                <Tab text="📦 Orders">
+                    <content>
+                        <AnchorPane style="-fx-background-color: transparent;">
+                            <children>
+                                <VBox prefHeight="590.0" prefWidth="1000.0" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <!-- Orders Header -->
+                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                                                    <children>
+                                                        <Label text="📦 Orders Management" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Button mnemonicParsing="false" onAction="#goToAddOrder" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Add Order">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+
+                                                <!-- Search Bar -->
+                                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                    <children>
+                                                        <Label text="🔍" textFill="#6b7280">
+                                                            <font>
+                                                                <Font size="16.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <TextField prefHeight="35.0" prefWidth="400.0" promptText="Search orders by customer, ID, or items..." style="-fx-background-color: #f9fafb; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
+                                                        <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 5;" text="Search">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <!-- Orders Table -->
+                                        <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="📋 Recent Orders" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <TableView fx:id="ordersTable" prefHeight="350.0" style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 5;">
+                                                    <columns>
+                                                        <TableColumn fx:id="orderIdCol" prefWidth="80.0" text="Order ID" />
+                                                        <TableColumn fx:id="customerCol" prefWidth="150.0" text="Customer" />
+                                                        <TableColumn fx:id="branchCol" prefWidth="100.0" text="Branch" />
+                                                        <TableColumn fx:id="itemsCol" prefWidth="265.3332214355469" text="Items" />
+                                                        <TableColumn fx:id="amountCol" prefWidth="152.666748046875" text="Amount (Ksh)" />
+                                                        <TableColumn fx:id="dateCol" prefWidth="146.6666259765625" text="Date" />
+                                                    </columns>
+                                                </TableView>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+
+                <!-- Add Order Tab -->
+                <Tab fx:id="addOrderTab" text="➕ Add Order">
+                    <content>
+                        <AnchorPane style="-fx-background-color: transparent;">
+                            <children>
+                                <VBox prefHeight="590.0" prefWidth="1000.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <!-- Order Header -->
+                                        <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="📝 Create New Order" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="18.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label text="Add items to create a new customer order" textFill="#6b7280">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <!-- Customer Selection -->
+                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="👤 Customer Selection" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                                    <children>
+                                                        <ChoiceBox fx:id="customerChoiceBox" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5;" />
+                                                        <Button mnemonicParsing="false" onAction="#goToAddCustomer" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Register New Customer">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <!-- Order Items -->
+                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="🛒 Order Items" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+
+                                                <!-- Add Item Row -->
+                                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                                    <children>
+                                                        <ChoiceBox fx:id="drinkChoiceBox" prefHeight="35.0" prefWidth="300.0" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5;" />
+                                                        <TextField fx:id="quantityField" prefHeight="35.0" prefWidth="80.0" promptText="Qty" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
+                                                        <Label fx:id="itemPriceLabel" text="Ksh. 0" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="14.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Add Item">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+
+                                                <!-- Order Summary -->
+                                                <VBox spacing="10.0">
+                                                    <children>
+                                                        <Label text="📋 Order Summary" textFill="#6b7280">
+                                                            <font>
+                                                                <Font size="14.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <VBox fx:id="orderItemsList" spacing="5.0" style="-fx-background-color: #f9fafb; -fx-border-color: #e5e7eb; -fx-border-radius: 5; -fx-padding: 15;">
+                                                            <children>
+                                                                <Label text="No items added yet" textFill="#9ca3af">
+                                                                    <font>
+                                                                        <Font size="12.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <!-- Order Actions -->
+                                        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label fx:id="orderTotalLabel" text="Total: Ksh. 0" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Cancel">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Button>
+                                                <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Place Order">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Button>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </HBox>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+
+                <!-- Customers Tab -->
+                <Tab fx:id="customersTab" text="👥 Customers">
+                    <content>
+                        <AnchorPane style="-fx-background-color: transparent;">
+                            <children>
+                                <VBox prefHeight="590.0" prefWidth="1000.0" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <!-- Customer Header -->
+                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="👥 Customer Management" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="18.0" />
+                                                    </font>
+                                                </Label>
+
+                                                <!-- Add Customer Form -->
+                                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                                    <children>
+                                                        <TextField fx:id="customerNameField" prefHeight="35.0" prefWidth="250.0" promptText="Customer Name" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
+                                                        <TextField fx:id="customerPhoneField" prefHeight="35.0" prefWidth="180.0" promptText="Phone Number" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
+                                                        <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Add Customer">
+                                                            <font>
+                                                                <Font size="12.0" />
+                                                            </font>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <!-- Customer Stats -->
+                                        <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label fx:id="customerStatsLabel" text="📊 127 Registered Customers" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="15.0" left="30.0" right="30.0" top="15.0" />
+                                            </padding>
+                                        </HBox>
+
+                                        <!-- Customer Table -->
+                                        <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="📋 Customer Directory" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <TableView fx:id="customersTable" prefHeight="300.0" style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 5;">
+                                                    <columns>
+                                                        <TableColumn prefWidth="120.0" text="Customer ID" />
+                                                        <TableColumn prefWidth="300.0" text="Customer Name" />
+                                                        <TableColumn prefWidth="200.0" text="Phone Number" />
+                                                        <TableColumn prefWidth="150.0" text="Total Orders" />
+                                                        <TableColumn prefWidth="150.0" text="Actions" />
+                                                    </columns>
+                                                </TableView>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+
+                <!-- View reports tab -->
+                <Tab fx:id="viewReportsTab" text="📊 Reports" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+                    <content>
+                        <AnchorPane style="-fx-background-color: transparent;">
+                            <children>
+                                <VBox prefHeight="590.0" prefWidth="1000.0" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <!-- Reports Header -->
+                                        <VBox prefHeight="69.0" prefWidth="960.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="📊 Reports Dashboard" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="18.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label text="View and generate detailed reports for your branch and business" textFill="#6b7280">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <!-- Reports Grid -->
+                                        <GridPane hgap="20.0" prefHeight="464.0" prefWidth="960.0" vgap="20.0">
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                            <children>
+                                                <!-- Customer Sales Report Card -->
+                                                <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2); -fx-cursor: hand;">
+                                                    <children>
+                                                        <Label text="Customer Sales Report" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="View sales data organized by customer" textAlignment="CENTER" textFill="#6b7280" wrapText="true">
+                                                            <font>
+                                                                <Font size="14.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #2563eb; -fx-background-radius: 5;">
+                                                            <children>
+                                                                <Label text="View Report" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="14.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <!-- Branches Report Card -->
+                                                <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2); -fx-cursor: hand;" GridPane.columnIndex="1">
+                                                    <children>
+                                                        <Label text="Branches Report" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Compare performance across all branches" textAlignment="CENTER" textFill="#6b7280" wrapText="true">
+                                                            <font>
+                                                                <Font size="14.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #059669; -fx-background-radius: 5;">
+                                                            <children>
+                                                                <Label text="View Report" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="14.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <!-- Branch Sales Report Card -->
+                                                <VBox alignment="CENTER" prefHeight="34.0" prefWidth="142.0" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2); -fx-cursor: hand;" GridPane.rowIndex="1">
+                                                    <children>
+                                                        <Label text="Branch Sales Report" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Detailed sales analysis for each branch" textAlignment="CENTER" textFill="#6b7280" wrapText="true">
+                                                            <font>
+                                                                <Font size="14.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #7c3aed; -fx-background-radius: 5;">
+                                                            <children>
+                                                                <Label text="View Report" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="14.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <!-- Total Sales Report Card -->
+                                                <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2); -fx-cursor: hand;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                                    <children>
+                                                        <Label text="Total Sales Report" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label text="Overall business performance and revenue" textAlignment="CENTER" textFill="#6b7280" wrapText="true">
+                                                            <font>
+                                                                <Font size="14.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #d97706; -fx-background-radius: 5;">
+                                                            <children>
+                                                                <Label text="View Report" textFill="WHITE">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="14.0" />
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                                    </padding>
+                                                </VBox>
+                                            </children>
+                                            <VBox.margin>
+                                                <Insets />
+                                            </VBox.margin>
+                                        </GridPane>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
+</AnchorPane>
