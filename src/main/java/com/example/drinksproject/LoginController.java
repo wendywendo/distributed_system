@@ -10,16 +10,11 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
@@ -46,30 +41,29 @@ public class LoginController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         branchComboBox.setItems(FXCollections.observableArrayList(branches));
         branchComboBox.setValue(branches[0]); // Default value
+        statusLabel.setVisible(false); // Hide initially
     }
 
-
-    // Code to handle login
-    public void onSubmit(ActionEvent event) throws  SQLException {
+    // Handle login
+    public void onSubmit(ActionEvent event) {
         String username = usernameTextField.getText().trim();
         String password = passwordTextField.getText().trim();
         String branch = branchComboBox.getValue();
 
-        if (username.isEmpty() || password.isEmpty() || branch.isEmpty()) {
-            statusLabel.setText("Please fill in all fields");
+        if (username.isEmpty() || password.isEmpty() || branch.equals("Select your branch")) {
+            statusLabel.setText("⚠️ Please fill in all fields correctly.");
             statusLabel.setVisible(true);
             return;
         }
 
-        boolean registered = registerUser(username, password, branch);
-        if (registered) {
-            statusLabel.setText("Successfully registered!");
+        boolean authenticated = validateLogin(username, password, branch);
+        if (authenticated) {
+            statusLabel.setText("✅ Login successful!");
             statusLabel.setVisible(true);
-
 
             new Thread(() -> {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(1000); // Delay to show message
                     Platform.runLater(() -> {
                         try {
                             Parent root = FXMLLoader.load(HelloApplication.class.getResource("dashboard.fxml"));
@@ -78,53 +72,79 @@ public class LoginController implements Initializable {
                             stage.setScene(scene);
                             stage.setMaximized(true);
                             stage.show();
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     });
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
             }).start();
-
         } else {
-            statusLabel.setText("❌ Username already exists.");
+            statusLabel.setText("❌ Invalid username, password, or branch.");
             statusLabel.setVisible(true);
         }
-
     }
 
+    // Login validation logic
+    private boolean validateLogin(String username, String password, String branchName) {
+        String query = """
+            SELECT u.username 
+            FROM users u
+            JOIN branches b ON u.branch_id = b.branch_id
+            WHERE u.username = ? AND u.password = ? AND b.branch_name = ?
+        """;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            stmt.setString(3, branchName);
+
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // Login successful if user exists
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Registration method — not used now, but preserved for later
     private boolean registerUser(String username, String password, String branchName) throws SQLException {
         String getBranchIdQuery = "SELECT branch_id FROM branches WHERE branch_name = ?";
         String checkUserExists = "SELECT * FROM users WHERE username = ?";
         String insertUserQuery = "INSERT INTO users (username, password, branch_id) VALUES (?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection()){
-            //get branch_id
+        try (Connection conn = DBConnection.getConnection()) {
+            // Get branch_id
             int branch_id = -1;
 
-            try(PreparedStatement stmt = conn.prepareStatement(getBranchIdQuery)){
+            try (PreparedStatement stmt = conn.prepareStatement(getBranchIdQuery)) {
                 stmt.setString(1, branchName);
                 ResultSet rs = stmt.executeQuery();
-                if (rs.next()){
+                if (rs.next()) {
                     branch_id = rs.getInt("branch_id");
                 }
             }
 
-            if (branch_id == -1){
-                System.out.println(" Invalid Branch !!!");
+            if (branch_id == -1) {
+                System.out.println("Invalid Branch!");
                 return false;
             }
 
-            try (PreparedStatement stmt = conn.prepareStatement(checkUserExists)){
+            // Check if user exists
+            try (PreparedStatement stmt = conn.prepareStatement(checkUserExists)) {
                 stmt.setString(1, username);
                 ResultSet rs = stmt.executeQuery();
-                if (rs.next()){
-                    return false;
+                if (rs.next()) {
+                    return false; // Username already taken
                 }
             }
 
-            try (PreparedStatement stmt = conn.prepareStatement(insertUserQuery)){
+            // Insert user
+            try (PreparedStatement stmt = conn.prepareStatement(insertUserQuery)) {
                 stmt.setString(1, username);
                 stmt.setString(2, password);
                 stmt.setInt(3, branch_id);
@@ -132,12 +152,9 @@ public class LoginController implements Initializable {
                 return true;
             }
 
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-
     }
 }
-
-
