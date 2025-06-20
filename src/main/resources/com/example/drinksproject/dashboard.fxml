@@ -433,7 +433,7 @@
                                                     <children>
                                                         <TextField fx:id="customerNameField" prefHeight="35.0" prefWidth="250.0" promptText="Customer Name" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
                                                         <TextField fx:id="customerPhoneField" prefHeight="35.0" prefWidth="180.0" promptText="Phone Number" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
-                                                        <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Add Customer">
+                                                        <Button fx:id="registerButton" onAction="#registerUser" mnemonicParsing="false" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Add Customer">
                                                             <font>
                                                                 <Font size="12.0" />
                                                             </font>

@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.example.drinksproject.dao.UserDao;
+
+
 public class DashboardController implements Initializable {
 
     private Stage stage;
@@ -39,6 +42,11 @@ public class DashboardController implements Initializable {
 
     @FXML private HBox quickActions;
     @FXML private Button viewReportsLink;
+
+    @FXML private TextField customerNameField;
+    @FXML private TextField customerPhoneField;
+    @FXML private Label customerStatsLabel;
+    @FXML private TableView<?> customersTable; // You can type this more specifically later if needed
 
     boolean isHeadquarters;
 
@@ -97,5 +105,30 @@ public class DashboardController implements Initializable {
 
         stage.show();
     }
+
+    @FXML
+    private void registerUser(ActionEvent event) {
+        String name = customerNameField.getText().trim();
+        String phone = customerPhoneField.getText().trim();
+
+        if (name.isEmpty() || phone.isEmpty()) {
+            customerStatsLabel.setText("❗ Please fill in all fields.");
+            return;
+        }
+
+        boolean success = UserDao.registerUser(name, phone);
+        if (success) {
+            customerStatsLabel.setText("✅ Customer registered successfully!");
+            customerNameField.clear();
+            customerPhoneField.clear();
+
+            // Optional: refresh customer table here if implemented
+        } else {
+            customerStatsLabel.setText("❌ Failed to register customer.");
+        }
+    }
+
+
+
 
 }
