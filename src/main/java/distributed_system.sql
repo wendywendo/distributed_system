@@ -1,10 +1,10 @@
+drop database distributed_system;
 CREATE DATABASE distributed_system;
 USE distributed_system;
 -- Create customer table
 CREATE TABLE customer (
     customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
+    customer_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL
 );
 
@@ -50,22 +50,20 @@ CREATE TABLE admin (
     FOREIGN KEY (branch_id) REFERENCES branch(branch_id)
 );
 
-INSERT INTO admin (username, password, branch_id)
-VALUES ('admin1', 'adminpass', 1);
-
-
-
--- Insert sample branches
 INSERT INTO branch (branch_name) VALUES
 ('Nairobi'),
 ('Mombasa'),
 ('Nakuru');
 
+INSERT INTO admin (username, password, branch_id)
+VALUES ('admin1', 'adminpass', 1);
+
+
 
 -- Insert sample customers
-INSERT INTO customer (first_name, last_name, phone) VALUES
-('John', 'Doe', '0712345678'),
-('Jane', 'Smith', '0798765432');
+INSERT INTO customer (customer_name, phone) VALUES
+('John', '0712345678'),
+('Jane', '0798765432');
 
 -- Insert sample drinks
 INSERT INTO drink (drink_name, price) VALUES

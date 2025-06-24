@@ -113,9 +113,9 @@ public class LoginController implements Initializable {
 
     // Registration method — not used now, but preserved for later
     private boolean registerUser(String username, String password, String branchName) throws SQLException {
-        String getBranchIdQuery = "SELECT branch_id FROM branches WHERE branch_name = ?";
-        String checkUserExists = "SELECT * FROM users WHERE username = ?";
-        String insertUserQuery = "INSERT INTO users (username, password, branch_id) VALUES (?, ?, ?)";
+        String getBranchIdQuery = "SELECT branch_id FROM branch WHERE branch_name = ?";
+        String checkUserExists = "SELECT * FROM admin WHERE username = ?";
+        String insertUserQuery = "INSERT INTO admin (username, password, branch_id) VALUES (?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection()) {
             // Get branch_id
