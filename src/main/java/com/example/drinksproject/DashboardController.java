@@ -18,7 +18,26 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.example.drinksproject.dao.UserDao;
+import com.example.drinksproject.dao.*;
+import com.example.drinksproject.model.*;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.ChoiceBox;
+
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+
+import java.net.URL;
+import java.util.*;
+
 
 
 public class DashboardController implements Initializable {
@@ -47,6 +66,16 @@ public class DashboardController implements Initializable {
     @FXML private TextField customerPhoneField;
     @FXML private Label customerStatsLabel;
     @FXML private TableView<?> customersTable; // You can type this more specifically later if needed
+
+    @FXML private ChoiceBox<Customer> customerChoiceBox;
+    @FXML private ChoiceBox<Drink> drinkChoiceBox;
+    @FXML private TextField quantityField;
+    @FXML private Label itemPriceLabel;
+    @FXML private VBox orderItemsList;
+    @FXML private Label orderTotalLabel;
+
+    private final List<OrderItem> orderItems = new ArrayList<>();
+    private double totalOrderCost = 0.0;
 
     boolean isHeadquarters;
 
@@ -78,6 +107,24 @@ public class DashboardController implements Initializable {
             tabPane.getTabs().remove(viewReportsTab);
             quickActions.getChildren().remove(viewReportsLink);
         }
+
+        // Load customer list
+        List<Customer> customers = CustomerDao.getAllCustomers();
+        customerChoiceBox.setItems(FXCollections.observableArrayList(customers));
+
+// Load drink list
+        List<Drink> drinks = DrinkDao.getAllDrinks();
+        drinkChoiceBox.setItems(FXCollections.observableArrayList(drinks));
+
+        drinkChoiceBox.setOnAction(event -> {
+            Drink selected = drinkChoiceBox.getValue();
+            if (selected != null) {
+                itemPriceLabel.setText("Ksh " + selected.getPrice());
+            }
+        });
+
+
+
     }
 
     public void goToAddOrder(ActionEvent event) throws IOException {
@@ -116,7 +163,7 @@ public class DashboardController implements Initializable {
             return;
         }
 
-        boolean success = UserDao.registerUser(name, phone);
+        boolean success = CustomerDao.registerUser(name, phone);
         if (success) {
             customerStatsLabel.setText("✅ Customer registered successfully!");
             customerNameField.clear();
