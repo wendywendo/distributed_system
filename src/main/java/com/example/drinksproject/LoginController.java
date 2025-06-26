@@ -90,8 +90,8 @@ public class LoginController implements Initializable {
     private boolean validateLogin(String username, String password, String branchName) {
         String query = """
             SELECT u.username 
-            FROM users u
-            JOIN branches b ON u.branch_id = b.branch_id
+            FROM admin u
+            JOIN branch b ON u.branch_id = b.branch_id
             WHERE u.username = ? AND u.password = ? AND b.branch_name = ?
         """;
 

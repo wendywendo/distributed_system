@@ -35,6 +35,7 @@ import javafx.scene.layout.HBox;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
+import javax.swing.*;
 import java.net.URL;
 import java.util.*;
 
@@ -74,10 +75,20 @@ public class DashboardController implements Initializable {
     @FXML private VBox orderItemsList;
     @FXML private Label orderTotalLabel;
 
+    @FXML private Button addItemButton;
+
     private final List<OrderItem> orderItems = new ArrayList<>();
     private double totalOrderCost = 0.0;
 
     boolean isHeadquarters;
+
+    private int branchId = 1; // field at the top
+
+    public void setBranch(int branchId) {
+        System.out.println("Setting branch ID: " + branchId); // debug log
+        this.branchId = branchId;
+    }
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -88,6 +99,8 @@ public class DashboardController implements Initializable {
         itemsCol.setCellValueFactory(cell -> cell.getValue().itemsProperty());
         amountCol.setCellValueFactory(cell -> cell.getValue().amountProperty().asObject());
         dateCol.setCellValueFactory(cell -> cell.getValue().dateProperty());
+
+
 
         // Sample data
         ObservableList<Order> orders = FXCollections.observableArrayList(
@@ -174,6 +187,104 @@ public class DashboardController implements Initializable {
             customerStatsLabel.setText("❌ Failed to register customer.");
         }
     }
+
+
+//    Handle add item
+    @FXML
+    private void handleAddItem(ActionEvent event) {
+        Drink selectedDrink = drinkChoiceBox.getValue();
+        String quantityText = quantityField.getText().trim();
+
+        if (selectedDrink == null || quantityText.isEmpty()) {
+            showAlert("❗ Please select a drink and enter quantity.");
+            return;
+        }
+
+        int quantity;
+        try {
+            quantity = Integer.parseInt(quantityText);
+            if (quantity <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            showAlert("❗ Quantity must be a positive number.");
+            return;
+        }
+
+        double price = selectedDrink.getPrice();
+        double itemTotal = price * quantity;
+
+        OrderItem item = new OrderItem(selectedDrink.getId(), selectedDrink.getName(), quantity, price);
+        orderItems.add(item);
+
+        // Display item in orderItemsList (VBox)
+        Label itemLabel = new Label(selectedDrink.getName() + " x" + quantity + " - Ksh " + itemTotal);
+        itemLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #374151;");
+        orderItemsList.getChildren().add(itemLabel);
+
+        // Update total
+        totalOrderCost += itemTotal;
+        orderTotalLabel.setText("Ksh " + totalOrderCost);
+
+        // Reset input fields
+        drinkChoiceBox.setValue(null);
+        quantityField.clear();
+        itemPriceLabel.setText("Ksh 0");
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+//   handle place order new implementation
+
+    @FXML
+    private void handlePlaceOrder(ActionEvent event) {
+        Customer selectedCustomer = customerChoiceBox.getValue();
+
+        if (selectedCustomer == null) {
+            showAlert("❗ Please select a customer.");
+            return;
+        }
+
+        if (orderItems.isEmpty()) {
+            showAlert("❗ Please add at least one item to the order.");
+            return;
+        }
+
+        // Insert order
+        int orderId = OrderDao.insertOrder(selectedCustomer.getId(), branchId);
+
+        if (orderId == -1) {
+            showAlert("❌ Failed to place order.");
+            return;
+        }
+
+        boolean allItemsInserted = true;
+        for (OrderItem item : orderItems) {
+            boolean success = OrderItemDao.insertOrderItem(orderId, item.getDrinkId(), item.getQuantity(), item.getTotalPrice());
+            if (!success) {
+                allItemsInserted = false;
+                break;
+            }
+        }
+
+        if (allItemsInserted) {
+            showAlert("✅ Order placed successfully!");
+
+            // Reset form
+            orderItems.clear();
+            orderItemsList.getChildren().clear();
+            orderTotalLabel.setText("Ksh 0");
+            totalOrderCost = 0.0;
+            customerChoiceBox.setValue(null);
+        } else {
+            showAlert("⚠️ Order saved but failed to save one or more items.");
+        }
+    }
+
+
 
 
 

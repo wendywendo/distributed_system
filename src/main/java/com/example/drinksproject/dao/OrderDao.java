@@ -11,6 +11,7 @@ import java.sql.*;
 
 public class OrderDao {
     public static int insertOrder(int customerId, int branchId) {
+        System.out.println("Inserting order for customerId=" + customerId + ", branchId=" + branchId);
         String query = "INSERT INTO `order` (customer_id, branch_id) VALUES (?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
