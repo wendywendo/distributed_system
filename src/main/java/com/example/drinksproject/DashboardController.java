@@ -1,5 +1,6 @@
 package com.example.drinksproject;
 
+import com.mysql.cj.x.protobuf.MysqlxCrud;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,6 +17,10 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ResourceBundle;
 
 import com.example.drinksproject.dao.*;
@@ -74,6 +79,11 @@ public class DashboardController implements Initializable {
     @FXML private Label itemPriceLabel;
     @FXML private VBox orderItemsList;
     @FXML private Label orderTotalLabel;
+
+    @FXML private Label todaySalesLabel;
+    @FXML private Label ordersCountLabel;
+    @FXML private Label customersCountLabel;
+  
     @FXML private Button addItemButton;
     @FXML private TextField searchField;
     @FXML private Label branchNameLabel;
@@ -125,7 +135,15 @@ public class DashboardController implements Initializable {
                 itemPriceLabel.setText("Ksh " + selected.getPrice());
             }
         });
+/*DASHBOARD PAGE*/
+        int totalCustomers = getAllCustomers();
+        int totalOrders = getTotalOrders();
+        double totalCost = getTotalOrderCost();
 
+        customersCountLabel.setText(String.valueOf(totalCustomers));
+        ordersCountLabel.setText(String.valueOf(totalOrders));
+        todaySalesLabel.setText(String.format("Ksh %.2f",totalCost));
+      
         // Set branch name label
         branchNameLabel.setText(Session.getBranchName().toUpperCase() + " BRANCH");
 
@@ -138,7 +156,6 @@ public class DashboardController implements Initializable {
         );
         ordersTable.setItems(orders);
     }
-
     public void goToAddOrder(ActionEvent event) throws IOException {
         tabPane.getSelectionModel().select(addOrderTab);
     }
@@ -150,6 +167,46 @@ public class DashboardController implements Initializable {
     public void goToViewReports(ActionEvent event) throws IOException {
         tabPane.getSelectionModel().select(viewReportsTab);
     }
+
+    //Data Access Operations
+    public static int getAllCustomers() {
+        String query = "SELECT COUNT(customer_id) FROM customer";
+        try(Connection connection= DBConnection.getConnection(); PreparedStatement statement =connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()) {
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e    );
+        }
+        return 0;
+    }
+
+    public static int getTotalOrders() {
+        String query = "SELECT COUNT(order_id) FROM orderitem";
+
+        try (Connection connection= DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()){
+            if (resultSet.next()){
+                return resultSet.getInt(1);
+            }
+        } catch (Exception e){
+            System.out.println("Error: " + e    );
+        }
+        return 0;
+    }
+
+    public static double getTotalOrderCost() {
+        String query = "SELECT SUM(total_price) FROM orderitem";
+
+        try(Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(query); ResultSet resultSet= statement.executeQuery()) {
+            if (resultSet.next()){
+                return resultSet.getDouble(1);
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e    );
+        }
+        return 0.0;
+    }
+
 
     // Logout action
     public void logout(ActionEvent event) throws IOException {
