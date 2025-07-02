@@ -1,18 +1,19 @@
 package com.example.drinksproject;
 
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 public class Order {
-    private final SimpleStringProperty orderId;
+    private final SimpleIntegerProperty orderId;
     private final SimpleStringProperty customer;
     private final SimpleStringProperty branch;
     private final SimpleStringProperty items;
     private final SimpleDoubleProperty amount;
     private final SimpleStringProperty date;
 
-    public Order(String orderId, String customer, String branch, String items, double amount, String date) {
-        this.orderId = new SimpleStringProperty(orderId);
+    public Order(int orderId, String customer, String branch, String items, double amount, String date) {
+        this.orderId = new SimpleIntegerProperty(orderId);
         this.customer = new SimpleStringProperty(customer);
         this.branch = new SimpleStringProperty(branch);
         this.items = new SimpleStringProperty(items);
@@ -22,15 +23,15 @@ public class Order {
 
     // Getters and setters for the properties (for JavaFX bindings)
 
-    public String getOrderId() {
+    public int getOrderId() {
         return orderId.get();
     }
 
     public void setOrderId(String value) {
-        orderId.set(value);
+        orderId.set(Integer.parseInt(value));
     }
 
-    public SimpleStringProperty orderIdProperty() {
+    public SimpleIntegerProperty orderIdProperty() {
         return orderId;
     }
 
