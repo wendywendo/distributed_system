@@ -89,7 +89,7 @@ public class LoginController implements Initializable {
     // Login validation logic
     private boolean validateLogin(String username, String password, String branchName) {
         String query = """
-            SELECT u.username 
+            SELECT u.username, b.branch_id
             FROM admin u
             JOIN branch b ON u.branch_id = b.branch_id
             WHERE u.username = ? AND u.password = ? AND b.branch_name = ?
@@ -103,12 +103,19 @@ public class LoginController implements Initializable {
             stmt.setString(3, branchName);
 
             ResultSet rs = stmt.executeQuery();
-            return rs.next(); // Login successful if user exists
+           if (rs.next()) { // Login successful if user exists
+               int branchId = rs.getInt("branch_id");
+
+               // Save session
+               Session.set(username, branchId, branchName);
+               return true;
+           }
 
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
+        return false;
     }
 
     // Registration method — not used now, but preserved for later

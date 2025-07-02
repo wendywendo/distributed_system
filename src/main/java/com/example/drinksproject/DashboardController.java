@@ -74,22 +74,14 @@ public class DashboardController implements Initializable {
     @FXML private Label itemPriceLabel;
     @FXML private VBox orderItemsList;
     @FXML private Label orderTotalLabel;
-
     @FXML private Button addItemButton;
-
     @FXML private TextField searchField;
+    @FXML private Label branchNameLabel;
 
     private final List<OrderItem> orderItems = new ArrayList<>();
     private double totalOrderCost = 0.0;
 
     boolean isHeadquarters;
-
-    private int branchId = 1; // field at the top
-
-    public void setBranch(int branchId) {
-        System.out.println("Setting branch ID: " + branchId); // debug log
-        this.branchId = branchId;
-    }
 
 
     @Override
@@ -134,6 +126,9 @@ public class DashboardController implements Initializable {
             }
         });
 
+        // Set branch name label
+        branchNameLabel.setText(Session.getBranchName().toUpperCase() + " BRANCH");
+
     }
 
     public void searchOrders(ActionEvent event) throws IOException {
@@ -158,6 +153,7 @@ public class DashboardController implements Initializable {
 
     // Logout action
     public void logout(ActionEvent event) throws IOException {
+        Session.clear();
         Parent root = FXMLLoader.load(HelloApplication.class.getResource("login.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         Scene scene = new Scene(root);
@@ -241,8 +237,7 @@ public class DashboardController implements Initializable {
         alert.showAndWait();
     }
 
-//   handle place order new implementation
-
+    //   Handle place order new implementation
     @FXML
     private void handlePlaceOrder(ActionEvent event) {
         Customer selectedCustomer = customerChoiceBox.getValue();
@@ -256,6 +251,9 @@ public class DashboardController implements Initializable {
             showAlert("❗ Please add at least one item to the order.");
             return;
         }
+
+        // Get current branch Id
+        int branchId = Session.getBranchId();
 
         // Insert order
         int orderId = OrderDao.insertOrder(selectedCustomer.getId(), branchId);
