@@ -79,29 +79,25 @@ public class DashboardController implements Initializable {
     @FXML private Label itemPriceLabel;
     @FXML private VBox orderItemsList;
     @FXML private Label orderTotalLabel;
+
     @FXML private Label todaySalesLabel;
     @FXML private Label ordersCountLabel;
     @FXML private Label customersCountLabel;
-
+  
     @FXML private Button addItemButton;
+    @FXML private TextField searchField;
+    @FXML private Label branchNameLabel;
 
     private final List<OrderItem> orderItems = new ArrayList<>();
     private double totalOrderCost = 0.0;
 
     boolean isHeadquarters;
 
-    private int branchId = 1; // field at the top
-
-    public void setBranch(int branchId) {
-        System.out.println("Setting branch ID: " + branchId); // debug log
-        this.branchId = branchId;
-    }
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Bind properties
-        orderIdCol.setCellValueFactory(cell -> cell.getValue().orderIdProperty());
+        orderIdCol.setCellValueFactory(cell -> cell.getValue().orderIdProperty().asString());
         customerCol.setCellValueFactory(cell -> cell.getValue().customerProperty());
         branchCol.setCellValueFactory(cell -> cell.getValue().branchProperty());
         itemsCol.setCellValueFactory(cell -> cell.getValue().itemsProperty());
@@ -109,15 +105,11 @@ public class DashboardController implements Initializable {
         dateCol.setCellValueFactory(cell -> cell.getValue().dateProperty());
 
 
-
-        // Sample data
+        // Load orders
+        List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
         ObservableList<Order> orders = FXCollections.observableArrayList(
-                new Order("ORD-001", "John Doe", "NAIROBI HQ", "Coca Cola x5, Sprite x3", 850, "2024-06-02"),
-                new Order("ORD-002", "Jane Smith", "NAKURU", "Pepsi x2, Fanta x4", 720, "2024-06-02"),
-                new Order("ORD-003", "Mike Johnson", "MOMBASA", "Water x10, Energy Drink x2", 650, "2024-06-01"),
-                new Order("ORD-004", "Sarah Wilson", "KISUMU", "Juice x3, Soda x6", 950, "2024-06-01")
+                ordersList
         );
-
         ordersTable.setItems(orders);
 
         // Show the reports only when current user isHeadquarters
@@ -133,7 +125,7 @@ public class DashboardController implements Initializable {
         List<Customer> customers = CustomerDao.getAllCustomers();
         customerChoiceBox.setItems(FXCollections.observableArrayList(customers));
 
-// Load drink list
+        // Load drink list
         List<Drink> drinks = DrinkDao.getAllDrinks();
         drinkChoiceBox.setItems(FXCollections.observableArrayList(drinks));
 
@@ -151,8 +143,18 @@ public class DashboardController implements Initializable {
         customersCountLabel.setText(String.valueOf(totalCustomers));
         ordersCountLabel.setText(String.valueOf(totalOrders));
         todaySalesLabel.setText(String.format("Ksh %.2f",totalCost));
+      
+        // Set branch name label
+        branchNameLabel.setText(Session.getBranchName().toUpperCase() + " BRANCH");
 
+    }
 
+    public void searchOrders(ActionEvent event) throws IOException {
+        List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
+        ObservableList<Order> orders = FXCollections.observableArrayList(
+                ordersList
+        );
+        ordersTable.setItems(orders);
     }
     public void goToAddOrder(ActionEvent event) throws IOException {
         tabPane.getSelectionModel().select(addOrderTab);
@@ -208,6 +210,7 @@ public class DashboardController implements Initializable {
 
     // Logout action
     public void logout(ActionEvent event) throws IOException {
+        Session.clear();
         Parent root = FXMLLoader.load(HelloApplication.class.getResource("login.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         Scene scene = new Scene(root);
@@ -291,8 +294,7 @@ public class DashboardController implements Initializable {
         alert.showAndWait();
     }
 
-//   handle place order new implementation
-
+    //   Handle place order new implementation
     @FXML
     private void handlePlaceOrder(ActionEvent event) {
         Customer selectedCustomer = customerChoiceBox.getValue();
@@ -306,6 +308,9 @@ public class DashboardController implements Initializable {
             showAlert("❗ Please add at least one item to the order.");
             return;
         }
+
+        // Get current branch Id
+        int branchId = Session.getBranchId();
 
         // Insert order
         int orderId = OrderDao.insertOrder(selectedCustomer.getId(), branchId);
@@ -333,6 +338,11 @@ public class DashboardController implements Initializable {
             orderTotalLabel.setText("Ksh 0");
             totalOrderCost = 0.0;
             customerChoiceBox.setValue(null);
+
+            // Reload orders list
+            List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
+            ObservableList<Order> orders = FXCollections.observableArrayList(ordersList);
+            ordersTable.setItems(orders);
         } else {
             showAlert("⚠️ Order saved but failed to save one or more items.");
         }
