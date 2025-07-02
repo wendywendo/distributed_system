@@ -54,6 +54,7 @@ INSERT INTO branch (branch_name) VALUES
 ('Nairobi'),
 ('Mombasa'),
 ('Nakuru');
+('Kisumu')
 
 INSERT INTO admin (username, password, branch_id)
 VALUES ('admin1', 'adminpass', 1);
