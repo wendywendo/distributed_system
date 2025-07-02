@@ -182,7 +182,7 @@ public class DashboardController implements Initializable {
     }
 
     public static int getTotalOrders() {
-        String query = "SELECT COUNT(order_id) FROM orderitem";
+        String query = "SELECT COUNT(order_id) FROM `order`";
 
         try (Connection connection= DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()){
             if (resultSet.next()){
