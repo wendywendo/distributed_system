@@ -1,5 +1,8 @@
-package com.example.drinksproject;
+package com.example.drinksproject.controller;
 
+import com.example.drinksproject.DBConnection;
+import com.example.drinksproject.HelloApplication;
+import com.example.drinksproject.Session;
 import com.mysql.cj.x.protobuf.MysqlxCrud;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -18,7 +21,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ResourceBundle;
@@ -26,22 +28,9 @@ import java.util.ResourceBundle;
 import com.example.drinksproject.dao.*;
 import com.example.drinksproject.model.*;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.ChoiceBox;
 
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-
-import javax.swing.*;
-import java.net.URL;
 import java.util.*;
 
 
@@ -233,20 +222,31 @@ public class DashboardController implements Initializable {
             return;
         }
 
-        boolean success = CustomerDao.registerUser(name, phone);
-        if (success) {
-            customerStatsLabel.setText("✅ Customer registered successfully!");
-            customerNameField.clear();
-            customerPhoneField.clear();
+        try {
+            // Call RMI service
+            com.example.drinksproject.rmi.shared.CustomerService service =
+                    (com.example.drinksproject.rmi.shared.CustomerService)
+                            java.rmi.Naming.lookup("rmi://localhost/CustomerService");
 
-            // Optional: refresh customer table here if implemented
-        } else {
-            customerStatsLabel.setText("❌ Failed to register customer.");
+            boolean success = service.registerCustomer(name, phone);
+
+            if (success) {
+                customerStatsLabel.setText("✅ Customer registered remotely!");
+                customerNameField.clear();
+                customerPhoneField.clear();
+            } else {
+                customerStatsLabel.setText("❌ Remote registration failed.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            customerStatsLabel.setText("❌ RMI error: " + e.getMessage());
         }
     }
 
 
-//    Handle add item
+
+    //    Handle add item
     @FXML
     private void handleAddItem(ActionEvent event) {
         Drink selectedDrink = drinkChoiceBox.getValue();

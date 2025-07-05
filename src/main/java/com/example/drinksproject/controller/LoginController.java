@@ -1,5 +1,8 @@
-package com.example.drinksproject;
+package com.example.drinksproject.controller;
 
+import com.example.drinksproject.DBConnection;
+import com.example.drinksproject.HelloApplication;
+import com.example.drinksproject.Session;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;

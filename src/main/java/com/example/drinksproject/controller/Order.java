@@ -1,4 +1,4 @@
-package com.example.drinksproject;
+package com.example.drinksproject.controller;
 
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
