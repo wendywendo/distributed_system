@@ -1,6 +1,8 @@
 package com.example.drinksproject;
 
 import com.mysql.cj.x.protobuf.MysqlxCrud;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,6 +19,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.Key;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -39,6 +42,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.util.Duration;
 
 import javax.swing.*;
 import java.net.URL;
@@ -135,17 +139,16 @@ public class DashboardController implements Initializable {
                 itemPriceLabel.setText("Ksh " + selected.getPrice());
             }
         });
-/*DASHBOARD PAGE*/
-        int totalCustomers = getAllCustomers();
-        int totalOrders = getTotalOrders();
-        double totalCost = getTotalOrderCost();
-
-        customersCountLabel.setText(String.valueOf(totalCustomers));
-        ordersCountLabel.setText(String.valueOf(totalOrders));
-        todaySalesLabel.setText(String.format("Ksh %.2f",totalCost));
       
         // Set branch name label
         branchNameLabel.setText(Session.getBranchName().toUpperCase() + " BRANCH");
+
+        //updating the stats
+        updateDashboardStats();
+                                                            //updates after every 1 sec
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> updateDashboardStats()));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
 
     }
 
@@ -168,7 +171,7 @@ public class DashboardController implements Initializable {
         tabPane.getSelectionModel().select(viewReportsTab);
     }
 
-    //Data Access Operations
+                    //DASHBOARD STATS
     public static int getAllCustomers() {
         String query = "SELECT COUNT(customer_id) FROM customer";
         try(Connection connection= DBConnection.getConnection(); PreparedStatement statement =connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()) {
@@ -205,6 +208,19 @@ public class DashboardController implements Initializable {
             System.out.println("Error: " + e    );
         }
         return 0.0;
+    }
+
+    //Updating the Dashboard stats
+    private void updateDashboardStats(){
+        int totalCustomers = getAllCustomers();
+        int totalOrders = getTotalOrders();
+        double totalCost = getTotalOrderCost();
+
+        Platform.runLater(() ->{
+            customersCountLabel.setText(String.valueOf(totalCustomers));
+            ordersCountLabel.setText(String.valueOf(totalOrders));
+            todaySalesLabel.setText(String.format("Ksh %.2f",totalCost));
+        });
     }
 
 
