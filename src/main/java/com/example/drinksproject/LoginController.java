@@ -57,33 +57,50 @@ public class LoginController implements Initializable {
         }
 
         boolean authenticated = validateLogin(username, password, branch);
+
         if (authenticated) {
             statusLabel.setText("✅ Login successful!");
             statusLabel.setVisible(true);
+            proceedToDashboard(event);
 
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000); // Delay to show message
-                    Platform.runLater(() -> {
-                        try {
-                            Parent root = FXMLLoader.load(HelloApplication.class.getResource("dashboard.fxml"));
-                            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                            scene = new Scene(root);
-                            stage.setScene(scene);
-                            stage.setMaximized(true);
-                            stage.show();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
         } else {
+            try {
+                boolean registered = registerUser(username, password, branch);
+                if (registered) {
+                    statusLabel.setText("✅ Registered & logged in!");
+                    statusLabel.setVisible(true);
+                    proceedToDashboard(event);
+                    return;
+                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
             statusLabel.setText("❌ Invalid username, password, or branch.");
             statusLabel.setVisible(true);
         }
+    }
+
+    private void proceedToDashboard(ActionEvent event) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000); // Delay to show message
+                Platform.runLater(() -> {
+                    try {
+                        Parent root = FXMLLoader.load(HelloApplication.class.getResource("dashboard.fxml"));
+                        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                        scene = new Scene(root);
+                        stage.setScene(scene);
+                        stage.setMaximized(true);
+                        stage.show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     // Login validation logic
