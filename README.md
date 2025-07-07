@@ -1,10 +1,4 @@
-Here’s a complete README.md tailored for your JavaFX RMI-based Drinks Ordering System, assuming:
 
-The server is in the master project.
-
-The client is in the ft-Nakuru_Branch_testing project.
-
-You're using RMI to handle login, order processing, customer registration, and drink loading remotely.
 
 🥤 Drinks Ordering System (RMI-Based)
 This system consists of a central Headquarters server (master project) and a branch client (ft-Nakuru_Branch_testing project) that communicates via Java RMI (Remote Method Invocation).
