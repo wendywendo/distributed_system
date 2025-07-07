@@ -1,7 +1,7 @@
 package com.example.drinksproject.dao;
 
 import com.example.drinksproject.DBConnection;
-import com.example.drinksproject.controller.Order;
+import com.example.drinksproject.model.Order;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

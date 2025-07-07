@@ -1,12 +1,15 @@
 package com.example.drinksproject.controller;
 
-import com.example.drinksproject.DBConnection;
 import com.example.drinksproject.HelloApplication;
 import com.example.drinksproject.Session;
-import com.mysql.cj.x.protobuf.MysqlxCrud;
+import com.example.drinksproject.model.*;
+
+import com.example.drinksproject.rmi.shared.CustomerService;
+import com.example.drinksproject.rmi.shared.DrinkService;
+import com.example.drinksproject.rmi.shared.OrderService;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,31 +19,17 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ResourceBundle;
-
-import com.example.drinksproject.dao.*;
-import com.example.drinksproject.model.*;
-
-import javafx.scene.layout.VBox;
-import javafx.scene.control.ChoiceBox;
-
+import java.rmi.Naming;
 import java.util.*;
-
-
 
 public class DashboardController implements Initializable {
 
-    private Stage stage;
-    private Scene scene;
-    private Parent root;
-
+    // ========== FXML UI Bindings ==========
     @FXML private TableView<Order> ordersTable;
     @FXML private TableColumn<Order, String> orderIdCol;
     @FXML private TableColumn<Order, String> customerCol;
@@ -50,17 +39,13 @@ public class DashboardController implements Initializable {
     @FXML private TableColumn<Order, String> dateCol;
 
     @FXML private TabPane tabPane;
-    @FXML private Tab addOrderTab;
-    @FXML private Tab customersTab;
-    @FXML private Tab viewReportsTab;
-
+    @FXML private Tab addOrderTab, customersTab, viewReportsTab;
     @FXML private HBox quickActions;
     @FXML private Button viewReportsLink;
 
-    @FXML private TextField customerNameField;
-    @FXML private TextField customerPhoneField;
+    @FXML private TextField customerNameField, customerPhoneField;
     @FXML private Label customerStatsLabel;
-    @FXML private TableView<?> customersTable; // You can type this more specifically later if needed
+    @FXML private TableView<?> customersTable;
 
     @FXML private ChoiceBox<Customer> customerChoiceBox;
     @FXML private ChoiceBox<Drink> drinkChoiceBox;
@@ -69,54 +54,60 @@ public class DashboardController implements Initializable {
     @FXML private VBox orderItemsList;
     @FXML private Label orderTotalLabel;
 
-    @FXML private Label todaySalesLabel;
-    @FXML private Label ordersCountLabel;
-    @FXML private Label customersCountLabel;
-  
-    @FXML private Button addItemButton;
+    @FXML private Label todaySalesLabel, ordersCountLabel, customersCountLabel;
     @FXML private TextField searchField;
     @FXML private Label branchNameLabel;
 
+    // ========== Internal Variables ==========
     private final List<OrderItem> orderItems = new ArrayList<>();
     private double totalOrderCost = 0.0;
+    private boolean isHeadquarters = true;
 
-    boolean isHeadquarters;
+    // RMI Services
+    private OrderService orderService;
+    private CustomerService customerService;
+    private DrinkService drinkService;
 
-
+    // ========== Initialization ==========
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Bind properties
+        try {
+            // Connect to RMI services
+            orderService = (OrderService) Naming.lookup("rmi://localhost/OrderService");
+            customerService = (CustomerService) Naming.lookup("rmi://localhost/CustomerService");
+            drinkService = (DrinkService) Naming.lookup("rmi://localhost/DrinkService");
+        } catch (Exception e) {
+            showAlert("❗ Could not connect to RMI services: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        initializeTableColumns();
+        setupUIBindings();
+        loadOrders("");
+        loadCustomersFromRMI();
+        loadDrinksFromRMI();
+        updateDashboardStats();
+
+        // Hide HQ-only UI for branches
+        if (!isHeadquarters) {
+            tabPane.getTabs().remove(viewReportsTab);
+            quickActions.getChildren().remove(viewReportsLink);
+        }
+    }
+
+    // ========== Setup Methods ==========
+
+    private void initializeTableColumns() {
         orderIdCol.setCellValueFactory(cell -> cell.getValue().orderIdProperty().asString());
         customerCol.setCellValueFactory(cell -> cell.getValue().customerProperty());
         branchCol.setCellValueFactory(cell -> cell.getValue().branchProperty());
         itemsCol.setCellValueFactory(cell -> cell.getValue().itemsProperty());
         amountCol.setCellValueFactory(cell -> cell.getValue().amountProperty().asObject());
         dateCol.setCellValueFactory(cell -> cell.getValue().dateProperty());
+    }
 
-
-        // Load orders
-        List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
-        ObservableList<Order> orders = FXCollections.observableArrayList(
-                ordersList
-        );
-        ordersTable.setItems(orders);
-
-        // Show the reports only when current user isHeadquarters
-        // Implement function to check this
-        isHeadquarters = true;
-
-        if (!isHeadquarters) {
-            tabPane.getTabs().remove(viewReportsTab);
-            quickActions.getChildren().remove(viewReportsLink);
-        }
-
-        // Load customer list
-        List<Customer> customers = CustomerDao.getAllCustomers();
-        customerChoiceBox.setItems(FXCollections.observableArrayList(customers));
-
-        // Load drink list
-        List<Drink> drinks = DrinkDao.getAllDrinks();
-        drinkChoiceBox.setItems(FXCollections.observableArrayList(drinks));
+    private void setupUIBindings() {
+        branchNameLabel.setText(Session.getBranchName().toUpperCase() + " BRANCH");
 
         drinkChoiceBox.setOnAction(event -> {
             Drink selected = drinkChoiceBox.getValue();
@@ -124,91 +115,88 @@ public class DashboardController implements Initializable {
                 itemPriceLabel.setText("Ksh " + selected.getPrice());
             }
         });
-/*DASHBOARD PAGE*/
-        int totalCustomers = getAllCustomers();
-        int totalOrders = getTotalOrders();
-        double totalCost = getTotalOrderCost();
-
-        customersCountLabel.setText(String.valueOf(totalCustomers));
-        ordersCountLabel.setText(String.valueOf(totalOrders));
-        todaySalesLabel.setText(String.format("Ksh %.2f",totalCost));
-      
-        // Set branch name label
-        branchNameLabel.setText(Session.getBranchName().toUpperCase() + " BRANCH");
-
     }
 
-    public void searchOrders(ActionEvent event) throws IOException {
-        List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
-        ObservableList<Order> orders = FXCollections.observableArrayList(
-                ordersList
-        );
-        ordersTable.setItems(orders);
+    // ========== RMI Data Loaders ==========
+
+    private void loadOrders(String search) {
+        try {
+            List<OrderDTO> dtoList = orderService.getAllOrders(search);
+            List<Order> fxOrders = convertToJavaFXOrders(dtoList);
+            ordersTable.setItems(FXCollections.observableArrayList(fxOrders));
+        } catch (Exception e) {
+            showAlert("❗ Failed to load orders: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-    public void goToAddOrder(ActionEvent event) throws IOException {
+
+    private void loadCustomersFromRMI() {
+        try {
+            List<Customer> customers = customerService.getAllCustomers();
+            customerChoiceBox.setItems(FXCollections.observableArrayList(customers));
+        } catch (Exception e) {
+            showAlert("⚠️ Could not load customers: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadDrinksFromRMI() {
+        try {
+            List<Drink> drinks = drinkService.getAllDrinks();
+            drinkChoiceBox.setItems(FXCollections.observableArrayList(drinks));
+        } catch (Exception e) {
+            showAlert("⚠️ Could not load drinks: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private List<Order> convertToJavaFXOrders(List<OrderDTO> dtoList) {
+        List<Order> fxOrders = new ArrayList<>();
+        for (OrderDTO dto : dtoList) {
+            fxOrders.add(new Order(dto.getOrderId(), dto.getCustomer(), dto.getBranch(), dto.getItems(), dto.getAmount(), dto.getDate()));
+        }
+        return fxOrders;
+    }
+
+    private void updateDashboardStats() {
+        try {
+            customersCountLabel.setText(String.valueOf(customerService.getCustomerCount()));
+            ordersCountLabel.setText(String.valueOf(orderService.getOrderCount()));
+            todaySalesLabel.setText(String.format("Ksh %.2f", orderService.getTotalSales()));
+        } catch (Exception e) {
+            showAlert("⚠️ Failed to load dashboard stats: " + e.getMessage());
+        }
+    }
+
+    // ========== UI Button Actions ==========
+
+    @FXML
+    private void searchOrders(ActionEvent event) {
+        loadOrders(searchField.getText().trim());
+    }
+
+    @FXML
+    private void goToAddOrder(ActionEvent event) {
         tabPane.getSelectionModel().select(addOrderTab);
     }
 
-    public void goToAddCustomer(ActionEvent event) throws IOException {
+    @FXML
+    private void goToAddCustomer(ActionEvent event) {
         tabPane.getSelectionModel().select(customersTab);
     }
 
-    public void goToViewReports(ActionEvent event) throws IOException {
+    @FXML
+    private void goToViewReports(ActionEvent event) {
         tabPane.getSelectionModel().select(viewReportsTab);
     }
 
-    //Data Access Operations
-    public static int getAllCustomers() {
-        String query = "SELECT COUNT(customer_id) FROM customer";
-        try(Connection connection= DBConnection.getConnection(); PreparedStatement statement =connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()) {
-            if (resultSet.next()) {
-                return resultSet.getInt(1);
-            }
-        } catch (Exception e) {
-            System.out.println("Error: " + e    );
-        }
-        return 0;
-    }
-
-    public static int getTotalOrders() {
-        String query = "SELECT COUNT(order_id) FROM `order`";
-
-        try (Connection connection= DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()){
-            if (resultSet.next()){
-                return resultSet.getInt(1);
-            }
-        } catch (Exception e){
-            System.out.println("Error: " + e    );
-        }
-        return 0;
-    }
-
-    public static double getTotalOrderCost() {
-        String query = "SELECT SUM(total_price) FROM orderitem";
-
-        try(Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(query); ResultSet resultSet= statement.executeQuery()) {
-            if (resultSet.next()){
-                return resultSet.getDouble(1);
-            }
-        } catch (Exception e) {
-            System.out.println("Error: " + e    );
-        }
-        return 0.0;
-    }
-
-
-    // Logout action
-    public void logout(ActionEvent event) throws IOException {
+    @FXML
+    private void logout(ActionEvent event) throws IOException {
         Session.clear();
         Parent root = FXMLLoader.load(HelloApplication.class.getResource("login.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        Scene scene = new Scene(root);
-
-        stage.setScene(scene);
-
-        // Force maximize *after* setting the scene
+        stage.setScene(new Scene(root));
         Platform.runLater(() -> stage.setMaximized(true));
-
         stage.show();
     }
 
@@ -223,30 +211,21 @@ public class DashboardController implements Initializable {
         }
 
         try {
-            // Call RMI service
-            com.example.drinksproject.rmi.shared.CustomerService service =
-                    (com.example.drinksproject.rmi.shared.CustomerService)
-                            java.rmi.Naming.lookup("rmi://localhost/CustomerService");
-
-            boolean success = service.registerCustomer(name, phone);
-
+            boolean success = customerService.registerCustomer(name, phone);
             if (success) {
                 customerStatsLabel.setText("✅ Customer registered remotely!");
                 customerNameField.clear();
                 customerPhoneField.clear();
+                loadCustomersFromRMI();
             } else {
-                customerStatsLabel.setText("❌ Remote registration failed.");
+                customerStatsLabel.setText("❌ Registration failed on server.");
             }
-
         } catch (Exception e) {
+            customerStatsLabel.setText("⚠️ RMI Error: " + e.getMessage());
             e.printStackTrace();
-            customerStatsLabel.setText("❌ RMI error: " + e.getMessage());
         }
     }
 
-
-
-    //    Handle add item
     @FXML
     private void handleAddItem(ActionEvent event) {
         Drink selectedDrink = drinkChoiceBox.getValue();
@@ -272,29 +251,18 @@ public class DashboardController implements Initializable {
         OrderItem item = new OrderItem(selectedDrink.getId(), selectedDrink.getName(), quantity, price);
         orderItems.add(item);
 
-        // Display item in orderItemsList (VBox)
         Label itemLabel = new Label(selectedDrink.getName() + " x" + quantity + " - Ksh " + itemTotal);
         itemLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #374151;");
         orderItemsList.getChildren().add(itemLabel);
 
-        // Update total
         totalOrderCost += itemTotal;
         orderTotalLabel.setText("Ksh " + totalOrderCost);
 
-        // Reset input fields
         drinkChoiceBox.setValue(null);
         quantityField.clear();
         itemPriceLabel.setText("Ksh 0");
     }
 
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    //   Handle place order new implementation
     @FXML
     private void handlePlaceOrder(ActionEvent event) {
         Customer selectedCustomer = customerChoiceBox.getValue();
@@ -309,48 +277,52 @@ public class DashboardController implements Initializable {
             return;
         }
 
-        // Get current branch Id
-        int branchId = Session.getBranchId();
+        try {
+            int branchId = Session.getBranchId();
+            int orderId = orderService.placeOrder(selectedCustomer.getId(), branchId);
 
-        // Insert order
-        int orderId = OrderDao.insertOrder(selectedCustomer.getId(), branchId);
-
-        if (orderId == -1) {
-            showAlert("❌ Failed to place order.");
-            return;
-        }
-
-        boolean allItemsInserted = true;
-        for (OrderItem item : orderItems) {
-            boolean success = OrderItemDao.insertOrderItem(orderId, item.getDrinkId(), item.getQuantity(), item.getTotalPrice());
-            if (!success) {
-                allItemsInserted = false;
-                break;
+            if (orderId == -1) {
+                showAlert("❌ Failed to place order.");
+                return;
             }
-        }
 
-        if (allItemsInserted) {
-            showAlert("✅ Order placed successfully!");
+            boolean allItemsInserted = true;
+            for (OrderItem item : orderItems) {
+                boolean success = orderService.addOrderItem(orderId, item.getDrinkId(), item.getQuantity(), item.getTotalPrice());
+                if (!success) {
+                    allItemsInserted = false;
+                    break;
+                }
+            }
 
-            // Reset form
-            orderItems.clear();
-            orderItemsList.getChildren().clear();
-            orderTotalLabel.setText("Ksh 0");
-            totalOrderCost = 0.0;
-            customerChoiceBox.setValue(null);
+            if (allItemsInserted) {
+                showAlert("✅ Order placed successfully!");
+                resetOrderForm();
+                loadOrders(searchField.getText().trim());
+            } else {
+                showAlert("⚠️ Order saved but failed to save one or more items.");
+            }
 
-            // Reload orders list
-            List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
-            ObservableList<Order> orders = FXCollections.observableArrayList(ordersList);
-            ordersTable.setItems(orders);
-        } else {
-            showAlert("⚠️ Order saved but failed to save one or more items.");
+        } catch (Exception e) {
+            showAlert("⚠️ RMI Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+    // ========== Utility Methods ==========
 
+    private void resetOrderForm() {
+        orderItems.clear();
+        orderItemsList.getChildren().clear();
+        orderTotalLabel.setText("Ksh 0");
+        totalOrderCost = 0.0;
+        customerChoiceBox.setValue(null);
+    }
 
-
-
-
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 }

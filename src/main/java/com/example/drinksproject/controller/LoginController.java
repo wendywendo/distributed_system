@@ -1,8 +1,10 @@
 package com.example.drinksproject.controller;
 
-import com.example.drinksproject.DBConnection;
 import com.example.drinksproject.HelloApplication;
 import com.example.drinksproject.Session;
+import com.example.drinksproject.rmi.shared.LoginResponseDTO;
+import com.example.drinksproject.rmi.shared.LoginService;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -17,37 +19,38 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.*;
+import java.rmi.Naming;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
 
+    private LoginService loginService;
+
+    @FXML private ChoiceBox<String> branchComboBox;
+    @FXML private TextField usernameTextField;
+    @FXML private PasswordField passwordTextField;
+    @FXML private Label statusLabel;
+
     private Stage stage;
     private Scene scene;
     private Parent root;
-
-    @FXML
-    private ChoiceBox<String> branchComboBox;
-
-    @FXML
-    private TextField usernameTextField;
-
-    @FXML
-    private PasswordField passwordTextField;
-
-    @FXML
-    private Label statusLabel;
 
     private final String[] branches = {"Select your branch", "Nairobi", "Nakuru", "Mombasa", "Kisumu"};
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         branchComboBox.setItems(FXCollections.observableArrayList(branches));
-        branchComboBox.setValue(branches[0]); // Default value
-        statusLabel.setVisible(false); // Hide initially
+        branchComboBox.setValue(branches[0]);
+        statusLabel.setVisible(false);
+
+        try {
+            loginService = (LoginService) Naming.lookup("rmi://localhost/LoginService");
+        } catch (Exception e) {
+            statusLabel.setText("❗ Could not connect to login service.");
+            e.printStackTrace();
+        }
     }
 
-    // Handle login
     public void onSubmit(ActionEvent event) {
         String username = usernameTextField.getText().trim();
         String password = passwordTextField.getText().trim();
@@ -59,112 +62,41 @@ public class LoginController implements Initializable {
             return;
         }
 
-        boolean authenticated = validateLogin(username, password, branch);
-        if (authenticated) {
-            statusLabel.setText("✅ Login successful!");
-            statusLabel.setVisible(true);
+        try {
+            LoginResponseDTO response = loginService.login(username, password, branch);
+            if (response != null) {
+                Session.set(response.getUsername(), response.getBranchId(), response.getBranchName());
+                statusLabel.setText("✅ Login successful!");
+                statusLabel.setVisible(true);
 
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000); // Delay to show message
-                    Platform.runLater(() -> {
-                        try {
-                            Parent root = FXMLLoader.load(HelloApplication.class.getResource("dashboard.fxml"));
-                            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                            scene = new Scene(root);
-                            stage.setScene(scene);
-                            stage.setMaximized(true);
-                            stage.show();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        } else {
-            statusLabel.setText("❌ Invalid username, password, or branch.");
-            statusLabel.setVisible(true);
-        }
-    }
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000);
+                        Platform.runLater(() -> {
+                            try {
+                                Parent root = FXMLLoader.load(HelloApplication.class.getResource("dashboard.fxml"));
+                                stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                                scene = new Scene(root);
+                                stage.setScene(scene);
+                                stage.setMaximized(true);
+                                stage.show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
 
-    // Login validation logic
-    private boolean validateLogin(String username, String password, String branchName) {
-        String query = """
-            SELECT u.username, b.branch_id
-            FROM admin u
-            JOIN branch b ON u.branch_id = b.branch_id
-            WHERE u.username = ? AND u.password = ? AND b.branch_name = ?
-        """;
+            } else {
+                statusLabel.setText("❌ Invalid username, password, or branch.");
+                statusLabel.setVisible(true);
+            }
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            stmt.setString(3, branchName);
-
-            ResultSet rs = stmt.executeQuery();
-           if (rs.next()) { // Login successful if user exists
-               int branchId = rs.getInt("branch_id");
-
-               // Save session
-               Session.set(username, branchId, branchName);
-               return true;
-           }
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            statusLabel.setText("⚠️ Login error: " + e.getMessage());
             e.printStackTrace();
-            return false;
-        }
-        return false;
-    }
-
-    // Registration method — not used now, but preserved for later
-    private boolean registerUser(String username, String password, String branchName) throws SQLException {
-        String getBranchIdQuery = "SELECT branch_id FROM branch WHERE branch_name = ?";
-        String checkUserExists = "SELECT * FROM admin WHERE username = ?";
-        String insertUserQuery = "INSERT INTO admin (username, password, branch_id) VALUES (?, ?, ?)";
-
-        try (Connection conn = DBConnection.getConnection()) {
-            // Get branch_id
-            int branch_id = -1;
-
-            try (PreparedStatement stmt = conn.prepareStatement(getBranchIdQuery)) {
-                stmt.setString(1, branchName);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    branch_id = rs.getInt("branch_id");
-                }
-            }
-
-            if (branch_id == -1) {
-                System.out.println("Invalid Branch!");
-                return false;
-            }
-
-            // Check if user exists
-            try (PreparedStatement stmt = conn.prepareStatement(checkUserExists)) {
-                stmt.setString(1, username);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    return false; // Username already taken
-                }
-            }
-
-            // Insert user
-            try (PreparedStatement stmt = conn.prepareStatement(insertUserQuery)) {
-                stmt.setString(1, username);
-                stmt.setString(2, password);
-                stmt.setInt(3, branch_id);
-                stmt.executeUpdate();
-                return true;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
     }
 }

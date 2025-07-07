@@ -14,4 +14,8 @@ module com.example.drinksproject {
 
     opens com.example.drinksproject.rmi.shared to java.rmi;
     exports com.example.drinksproject.rmi.server;
+    exports com.example.drinksproject.rmi.shared;
+    exports com.example.drinksproject.model;
+    opens com.example.drinksproject.model to javafx.fxml;
+
 }
