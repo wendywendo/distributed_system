@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.rmi.Naming;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class DashboardController implements Initializable {
 
@@ -65,6 +68,9 @@ public class DashboardController implements Initializable {
     private CustomerService customerService;
     private DrinkService drinkService;
 
+    // Auto-refresh task
+    private ScheduledExecutorService scheduler;
+
     // ========== Initialization ==========
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -83,6 +89,8 @@ public class DashboardController implements Initializable {
         loadCustomersFromRMI();
         loadDrinksFromRMI();
         updateDashboardStats();
+
+        startAutoRefresh();
 
         if (!isHeadquarters) {
             tabPane.getTabs().remove(viewReportsTab);
@@ -159,6 +167,23 @@ public class DashboardController implements Initializable {
         }
     }
 
+    // ========== Auto-Refresh Logic ==========
+    private void startAutoRefresh() {
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                try {
+                    loadOrders(searchField.getText().trim());
+                    loadCustomersFromRMI();
+                    loadDrinksFromRMI();
+                    updateDashboardStats();
+                } catch (Exception e) {
+                    System.err.println("Auto-refresh error: " + e.getMessage());
+                }
+            });
+        }, 0, 10, TimeUnit.SECONDS); // Refresh every 10 seconds
+    }
+
     // ========== UI Button Actions ==========
 
     @FXML
@@ -183,6 +208,11 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void logout(ActionEvent event) throws IOException {
+        // Stop scheduler
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdownNow();
+        }
+
         Session.clear();
         Parent root = FXMLLoader.load(HelloApplication.class.getResource("login.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -291,7 +321,6 @@ public class DashboardController implements Initializable {
                 showAlert("✅ Order placed successfully!");
                 resetOrderForm();
                 loadOrders(searchField.getText().trim());
-                updateDashboardStats();
             } else {
                 showAlert("⚠️ Order saved but failed to save one or more items.");
             }
