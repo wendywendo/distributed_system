@@ -53,7 +53,9 @@ CREATE TABLE admin (
 INSERT INTO branch (branch_name) VALUES
 ('Nairobi'),
 ('Mombasa'),
-('Nakuru');
+('Nakuru'),
+('Kisumu');
+
 
 INSERT INTO admin (username, password, branch_id)
 VALUES ('admin1', 'adminpass', 1);
