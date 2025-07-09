@@ -11,7 +11,7 @@ public class DBConnection {
 
     public static Connection getConnection() {
         try {
-            return DriverManager.getConnection("jdbc:mysql://localhost:3306/distributed_system", "root", "");
+            return DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (SQLException e) {
             System.out.println("❌ Connection failed!");
             e.printStackTrace();

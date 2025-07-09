@@ -57,39 +57,56 @@ public class LoginController implements Initializable {
         }
 
         boolean authenticated = validateLogin(username, password, branch);
+
         if (authenticated) {
             statusLabel.setText("✅ Login successful!");
             statusLabel.setVisible(true);
+            proceedToDashboard(event);
 
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000); // Delay to show message
-                    Platform.runLater(() -> {
-                        try {
-                            Parent root = FXMLLoader.load(HelloApplication.class.getResource("dashboard.fxml"));
-                            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                            scene = new Scene(root);
-                            stage.setScene(scene);
-                            stage.setMaximized(true);
-                            stage.show();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
         } else {
+            try {
+                boolean registered = registerUser(username, password, branch);
+                if (registered) {
+                    statusLabel.setText("✅ Registered & logged in!");
+                    statusLabel.setVisible(true);
+                    proceedToDashboard(event);
+                    return;
+                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
             statusLabel.setText("❌ Invalid username, password, or branch.");
             statusLabel.setVisible(true);
         }
     }
 
+    private void proceedToDashboard(ActionEvent event) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000); // Delay to show message
+                Platform.runLater(() -> {
+                    try {
+                        Parent root = FXMLLoader.load(HelloApplication.class.getResource("dashboard.fxml"));
+                        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                        scene = new Scene(root);
+                        stage.setScene(scene);
+                        stage.setMaximized(true);
+                        stage.show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
     // Login validation logic
     private boolean validateLogin(String username, String password, String branchName) {
         String query = """
-            SELECT u.username 
+            SELECT u.username, b.branch_id
             FROM admin u
             JOIN branch b ON u.branch_id = b.branch_id
             WHERE u.username = ? AND u.password = ? AND b.branch_name = ?
@@ -103,12 +120,19 @@ public class LoginController implements Initializable {
             stmt.setString(3, branchName);
 
             ResultSet rs = stmt.executeQuery();
-            return rs.next(); // Login successful if user exists
+           if (rs.next()) { // Login successful if user exists
+               int branchId = rs.getInt("branch_id");
+
+               // Save session
+               Session.set(username, branchId, branchName);
+               return true;
+           }
 
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
+        return false;
     }
 
     // Registration method — not used now, but preserved for later

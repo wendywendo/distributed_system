@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -25,7 +26,7 @@
             <children>
                 <HBox alignment="CENTER_LEFT" prefWidth="1000.0" spacing="20.0">
                     <children>
-                        <Label text="🏢 NAKURU BRANCH" textFill="#1f2937">
+                        <Label fx:id="branchNameLabel" text="🏢 NAKURU BRANCH" textFill="#1f2937">
                             <font>
                                 <Font name="System Bold" size="24.0" />
                             </font>
@@ -230,8 +231,8 @@
                                                                 <Font size="16.0" />
                                                             </font>
                                                         </Label>
-                                                        <TextField prefHeight="35.0" prefWidth="400.0" promptText="Search orders by customer, ID, or items..." style="-fx-background-color: #f9fafb; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
-                                                        <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 5;" text="Search">
+                                                        <TextField fx:id="searchField" prefHeight="35.0" prefWidth="400.0" promptText="Search orders by customer, ID, or items..." style="-fx-background-color: #f9fafb; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
+                                                        <Button mnemonicParsing="false" onAction="#searchOrders" prefHeight="35.0" prefWidth="80.0" style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 5;" text="Search">
                                                             <font>
                                                                 <Font size="12.0" />
                                                             </font>
@@ -280,135 +281,139 @@
                 <!-- Add Order Tab -->
                 <Tab fx:id="addOrderTab" text="➕ Add Order">
                     <content>
-                        <AnchorPane style="-fx-background-color: transparent;">
-                            <children>
-                                <VBox prefHeight="590.0" prefWidth="1000.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <ScrollPane fitToHeight="true" fitToWidth="true">
+                            <content>
+                                <AnchorPane style="-fx-background-color: transparent;">
                                     <children>
-                                        <!-- Order Header -->
-                                        <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                        <VBox prefHeight="590.0" prefWidth="1000.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
-                                                <Label text="📝 Create New Order" textFill="#1f2937">
-                                                    <font>
-                                                        <Font name="System Bold" size="18.0" />
-                                                    </font>
-                                                </Label>
-                                                <Label text="Add items to create a new customer order" textFill="#6b7280">
-                                                    <font>
-                                                        <Font size="14.0" />
-                                                    </font>
-                                                </Label>
-                                            </children>
-                                            <padding>
-                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
-                                            </padding>
-                                        </VBox>
-
-                                        <!-- Customer Selection -->
-                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                                            <children>
-                                                <Label text="👤 Customer Selection" textFill="#1f2937">
-                                                    <font>
-                                                        <Font name="System Bold" size="16.0" />
-                                                    </font>
-                                                </Label>
-                                                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                                <!-- Order Header -->
+                                                <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
                                                     <children>
-                                                        <ChoiceBox fx:id="customerChoiceBox" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5;" />
-                                                        <Button mnemonicParsing="false" onAction="#goToAddCustomer" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Register New Customer">
+                                                        <Label text="📝 Create New Order" textFill="#1f2937">
                                                             <font>
-                                                                <Font size="12.0" />
-                                                            </font>
-                                                        </Button>
-                                                    </children>
-                                                </HBox>
-                                            </children>
-                                            <padding>
-                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
-                                            </padding>
-                                        </VBox>
-
-                                        <!-- Order Items -->
-                                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                                            <children>
-                                                <Label text="🛒 Order Items" textFill="#1f2937">
-                                                    <font>
-                                                        <Font name="System Bold" size="16.0" />
-                                                    </font>
-                                                </Label>
-
-                                                <!-- Add Item Row -->
-                                                <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                                    <children>
-                                                        <ChoiceBox fx:id="drinkChoiceBox" prefHeight="35.0" prefWidth="300.0" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5;" />
-                                                        <TextField fx:id="quantityField" prefHeight="35.0" prefWidth="80.0" promptText="Qty" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
-                                                        <Label fx:id="itemPriceLabel" text="Ksh. 0" textFill="#1f2937">
-                                                            <font>
-                                                                <Font name="System Bold" size="14.0" />
+                                                                <Font name="System Bold" size="18.0" />
                                                             </font>
                                                         </Label>
-                                                        <Button mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Add Item" fx:id="addItemButton" onAction="#handleAddItem" >
-                                                            <font>
-                                                                <Font size="12.0" />
-                                                            </font>
-                                                        </Button>
-                                                    </children>
-                                                </HBox>
-
-                                                <!-- Order Summary -->
-                                                <VBox spacing="10.0">
-                                                    <children>
-                                                        <Label text="📋 Order Summary" textFill="#6b7280">
+                                                        <Label text="Add items to create a new customer order" textFill="#6b7280">
                                                             <font>
                                                                 <Font size="14.0" />
                                                             </font>
                                                         </Label>
-                                                        <VBox fx:id="orderItemsList" spacing="5.0" style="-fx-background-color: #f9fafb; -fx-border-color: #e5e7eb; -fx-border-radius: 5; -fx-padding: 15;">
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <!-- Customer Selection -->
+                                                <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                                    <children>
+                                                        <Label text="👤 Customer Selection" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="16.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <HBox alignment="CENTER_LEFT" spacing="15.0">
                                                             <children>
-                                                                <Label text="No items added yet" textFill="#9ca3af">
+                                                                <ChoiceBox fx:id="customerChoiceBox" prefHeight="35.0" prefWidth="250.0" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5;" />
+                                                                <Button mnemonicParsing="false" onAction="#goToAddCustomer" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Register New Customer">
                                                                     <font>
                                                                         <Font size="12.0" />
                                                                     </font>
+                                                                </Button>
+                                                            </children>
+                                                        </HBox>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                                    </padding>
+                                                </VBox>
+
+                                                <!-- Order Items -->
+                                                <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                                    <children>
+                                                        <Label text="🛒 Order Items" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="16.0" />
+                                                            </font>
+                                                        </Label>
+
+                                                        <!-- Add Item Row -->
+                                                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                                            <children>
+                                                                <ChoiceBox fx:id="drinkChoiceBox" prefHeight="35.0" prefWidth="300.0" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5;" />
+                                                                <TextField fx:id="quantityField" prefHeight="35.0" prefWidth="80.0" promptText="Qty" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
+                                                                <Label fx:id="itemPriceLabel" text="Ksh. 0" textFill="#1f2937">
+                                                                    <font>
+                                                                        <Font name="System Bold" size="14.0" />
+                                                                    </font>
                                                                 </Label>
+                                                                <Button fx:id="addItemButton" mnemonicParsing="false" onAction="#handleAddItem" prefHeight="35.0" prefWidth="100.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Add Item">
+                                                                    <font>
+                                                                        <Font size="12.0" />
+                                                                    </font>
+                                                                </Button>
+                                                            </children>
+                                                        </HBox>
+
+                                                        <!-- Order Summary -->
+                                                        <VBox spacing="10.0">
+                                                            <children>
+                                                                <Label text="📋 Order Summary" textFill="#6b7280">
+                                                                    <font>
+                                                                        <Font size="14.0" />
+                                                                    </font>
+                                                                </Label>
+                                                                <VBox fx:id="orderItemsList" spacing="5.0" style="-fx-background-color: #f9fafb; -fx-border-color: #e5e7eb; -fx-border-radius: 5; -fx-padding: 15;">
+                                                                    <children>
+                                                                        <Label text="No items added yet" textFill="#9ca3af">
+                                                                            <font>
+                                                                                <Font size="12.0" />
+                                                                            </font>
+                                                                        </Label>
+                                                                    </children>
+                                                                </VBox>
                                                             </children>
                                                         </VBox>
                                                     </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                                    </padding>
                                                 </VBox>
+
+                                                <!-- Order Actions -->
+                                                <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                                    <children>
+                                                        <Label fx:id="orderTotalLabel" text="Total: Ksh. 0" textFill="#1f2937">
+                                                            <font>
+                                                                <Font name="System Bold" size="16.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Cancel">
+                                                            <font>
+                                                                <Font size="14.0" />
+                                                            </font>
+                                                        </Button>
+                                                        <Button fx:id="placeOrderButton" mnemonicParsing="false" onAction="#handlePlaceOrder" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Place Order">
+                                                            <font>
+                                                                <Font size="14.0" />
+                                                            </font>
+                                                        </Button>
+                                                    </children>
+                                                    <padding>
+                                                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                                    </padding>
+                                                </HBox>
                                             </children>
                                             <padding>
-                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                             </padding>
                                         </VBox>
-
-                                        <!-- Order Actions -->
-                                        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                                            <children>
-                                                <Label fx:id="orderTotalLabel" text="Total: Ksh. 0" textFill="#1f2937">
-                                                    <font>
-                                                        <Font name="System Bold" size="16.0" />
-                                                    </font>
-                                                </Label>
-                                                <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="100.0" style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Cancel">
-                                                    <font>
-                                                        <Font size="14.0" />
-                                                    </font>
-                                                </Button>
-                                                <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Place Order" fx:id="placeOrderButton" onAction="#handlePlaceOrder">
-                                                    <font>
-                                                        <Font size="14.0" />
-                                                    </font>
-                                                </Button>
-                                            </children>
-                                            <padding>
-                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
-                                            </padding>
-                                        </HBox>
                                     </children>
-                                    <padding>
-                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                    </padding>
-                                </VBox>
-                            </children>
-                        </AnchorPane>
+                                </AnchorPane>
+                            </content>
+                        </ScrollPane>
                     </content>
                 </Tab>
 
@@ -433,7 +438,7 @@
                                                     <children>
                                                         <TextField fx:id="customerNameField" prefHeight="35.0" prefWidth="250.0" promptText="Customer Name" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
                                                         <TextField fx:id="customerPhoneField" prefHeight="35.0" prefWidth="180.0" promptText="Phone Number" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 5; -fx-padding: 10;" />
-                                                        <Button fx:id="registerButton" onAction="#registerUser" mnemonicParsing="false" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Add Customer">
+                                                        <Button fx:id="registerButton" mnemonicParsing="false" onAction="#registerUser" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Add Customer">
                                                             <font>
                                                                 <Font size="12.0" />
                                                             </font>
