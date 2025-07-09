@@ -171,7 +171,7 @@ public class DashboardController implements Initializable {
         tabPane.getSelectionModel().select(viewReportsTab);
     }
 
-                    //DASHBOARD STATS
+    //DASHBOARD STATS
     public static int getAllCustomers() {
         String query = "SELECT COUNT(customer_id) FROM customer";
         try(Connection connection= DBConnection.getConnection(); PreparedStatement statement =connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()) {
