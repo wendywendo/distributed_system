@@ -52,4 +52,21 @@ public class CustomerDao {
         return customers;
     }
 
-}
+    public static int getCustomersCount(){
+        String query="SELECT COUNT(customer_id) FROM customer";
+        try {
+            Connection connection = DBConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (Exception e){
+                System.out.println("Error:"+ e);
+            }
+        return 0;
+        }
+    }
+
+
