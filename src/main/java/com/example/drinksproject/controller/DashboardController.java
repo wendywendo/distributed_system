@@ -239,7 +239,8 @@ public class DashboardController implements Initializable {
         double price = selectedDrink.getPrice();
         double itemTotal = price * quantity;
 
-        OrderItem item = new OrderItem(selectedDrink.getId(), selectedDrink.getName(), quantity, price);
+        OrderItem item = new OrderItem(selectedDrink.getId(), selectedDrink.getName(), quantity, itemTotal);
+
         orderItems.add(item);
 
         Label itemLabel = new Label(selectedDrink.getName() + " x" + quantity + " - Ksh " + itemTotal);
@@ -290,6 +291,7 @@ public class DashboardController implements Initializable {
                 showAlert("✅ Order placed successfully!");
                 resetOrderForm();
                 loadOrders(searchField.getText().trim());
+                updateDashboardStats();
             } else {
                 showAlert("⚠️ Order saved but failed to save one or more items.");
             }
