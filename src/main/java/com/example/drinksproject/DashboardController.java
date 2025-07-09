@@ -64,6 +64,13 @@ public class DashboardController implements Initializable {
     @FXML private TableColumn<Order, Double> amountCol;
     @FXML private TableColumn<Order, String> dateCol;
 
+    @FXML private TableView<Customer> customersTable;
+    @FXML private TableColumn<Customer, String> customerIdCol;
+    @FXML private TableColumn<Customer, String> customerNameCol;
+    @FXML private TableColumn<Customer, String> customerPhoneCol;
+//    @FXML private TableColumn<Order, String> customerTotalOrdersCol;
+//    @FXML private TableColumn<Order, String> actionsCol;
+
     @FXML private TabPane tabPane;
     @FXML private Tab addOrderTab;
     @FXML private Tab customersTab;
@@ -75,7 +82,6 @@ public class DashboardController implements Initializable {
     @FXML private TextField customerNameField;
     @FXML private TextField customerPhoneField;
     @FXML private Label customerStatsLabel;
-    @FXML private TableView<?> customersTable; // You can type this more specifically later if needed
 
     @FXML private ChoiceBox<Customer> customerChoiceBox;
     @FXML private ChoiceBox<Drink> drinkChoiceBox;
@@ -108,6 +114,16 @@ public class DashboardController implements Initializable {
         amountCol.setCellValueFactory(cell -> cell.getValue().amountProperty().asObject());
         dateCol.setCellValueFactory(cell -> cell.getValue().dateProperty());
 
+        customerIdCol.setCellValueFactory(cell -> cell.getValue().customerIdProperty().asString());
+        customerNameCol.setCellValueFactory(cell -> cell.getValue().customerNameProperty());
+        customerPhoneCol.setCellValueFactory(cell -> cell.getValue().customerPhoneProperty());
+
+        // Load customers
+        List<Customer> customersList = CustomerDao.getAllCustomers();
+        ObservableList<Customer> customersObservable = FXCollections.observableArrayList(
+                customersList
+        );
+        customersTable.setItems(customersObservable);
 
         // Load orders
         List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
@@ -115,6 +131,9 @@ public class DashboardController implements Initializable {
                 ordersList
         );
         ordersTable.setItems(orders);
+
+        // Set customer stats label
+        customerStatsLabel.setText(String.valueOf(CustomerDao.getCustomersCount()) + " Registered Customers");
 
         // Show the reports only when current user isHeadquarters
         // Implement function to check this
@@ -174,7 +193,9 @@ public class DashboardController implements Initializable {
     //DASHBOARD STATS
     public static int getAllCustomers() {
         String query = "SELECT COUNT(customer_id) FROM customer";
-        try(Connection connection= DBConnection.getConnection(); PreparedStatement statement =connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()) {
+        try(Connection connection= DBConnection.getConnection();
+            PreparedStatement statement =connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery()) {
             if (resultSet.next()) {
                 return resultSet.getInt(1);
             }
@@ -256,13 +277,20 @@ public class DashboardController implements Initializable {
             customerPhoneField.clear();
 
             // Optional: refresh customer table here if implemented
+            List<Customer> customersList = CustomerDao.getAllCustomers();
+            ObservableList<Customer> customersObservable = FXCollections.observableArrayList(
+                    customersList
+            );
+            customersTable.setItems(customersObservable);
+
+            customerStatsLabel.setText(String.valueOf(CustomerDao.getCustomersCount()) + " Registered Customers");
         } else {
             customerStatsLabel.setText("❌ Failed to register customer.");
         }
     }
 
 
-//    Handle add item
+    // Handle add item
     @FXML
     private void handleAddItem(ActionEvent event) {
         Drink selectedDrink = drinkChoiceBox.getValue();
@@ -338,7 +366,16 @@ public class DashboardController implements Initializable {
 
         boolean allItemsInserted = true;
         for (OrderItem item : orderItems) {
-            boolean success = OrderItemDao.insertOrderItem(orderId, item.getDrinkId(), item.getQuantity(), item.getTotalPrice());
+
+            double unitPrice = DrinkDao.getDrinkPrice(item.getDrinkName());
+            double calculatedTotalPrice = unitPrice * item.getQuantity();
+
+            boolean success = OrderItemDao.insertOrderItem(
+                    orderId,
+                    item.getDrinkId(),
+                    item.getQuantity(),
+                    calculatedTotalPrice
+            );
             if (!success) {
                 allItemsInserted = false;
                 break;

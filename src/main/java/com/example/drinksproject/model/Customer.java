@@ -15,7 +15,7 @@ public class Customer {
     }
 
     public int getId() {
-       return id.get();
+        return id.get();
     }
 
     public SimpleIntegerProperty customerIdProperty() {
@@ -31,11 +31,13 @@ public class Customer {
     public String getPhone() {
         return phone.get();
     }
+
     public SimpleStringProperty customerPhoneProperty() {
         return phone;
     }
+
     @Override
     public String toString() {
-        return getName() +"(" + getPhone()+")";
+        return getName() + " (" + getPhone() + ")";
     }
 }

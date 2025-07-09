@@ -1,5 +1,6 @@
 package com.example.drinksproject;
 
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -94,4 +95,5 @@ public class Order {
     public SimpleStringProperty dateProperty() {
         return date;
     }
+
 }
