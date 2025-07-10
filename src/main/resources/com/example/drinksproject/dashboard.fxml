@@ -475,11 +475,11 @@
                                                 </Label>
                                                 <TableView fx:id="customersTable" prefHeight="300.0" style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 5;">
                                                     <columns>
-                                                        <TableColumn prefWidth="120.0" text="Customer ID" />
-                                                        <TableColumn prefWidth="300.0" text="Customer Name" />
-                                                        <TableColumn prefWidth="200.0" text="Phone Number" />
-                                                        <TableColumn prefWidth="150.0" text="Total Orders" />
-                                                        <TableColumn prefWidth="150.0" text="Actions" />
+                                                        <TableColumn prefWidth="120.0" text="Customer ID" fx:id="colCustomerID"/>
+                                                        <TableColumn prefWidth="300.0" text="Customer Name" fx:id="colCustomerName"/>
+                                                        <TableColumn prefWidth="200.0" text="Phone Number" fx:id="colCustomerPhone"/>
+                                                        <TableColumn prefWidth="150.0" text="Total Orders" fx:id="colTotalOrders"/>
+                                                        <TableColumn prefWidth="150.0" text="Actions"/>
                                                     </columns>
                                                 </TableView>
                                             </children>

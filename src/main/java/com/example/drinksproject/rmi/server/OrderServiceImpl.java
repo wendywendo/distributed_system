@@ -54,7 +54,7 @@ public class OrderServiceImpl extends UnicastRemoteObject implements OrderServic
     }
 
     @Override
-    public List<OrderDTO> getAllOrders(String searchString) throws RemoteException {
+    public List<OrderDTO> getAllOrders(String searchString, String branchname) throws RemoteException {
 
         List<OrderDTO> orders = new ArrayList<>();
 

@@ -4,6 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import com.example.drinksproject.dao.CustomerDao;
 import com.example.drinksproject.model.Customer;
 
 
