@@ -92,6 +92,9 @@ public class DashboardController implements Initializable {
     @FXML private TextField searchField;
     @FXML private Label branchNameLabel;
 
+
+
+
     private final List<OrderItem> orderItems = new ArrayList<>();
     private double totalOrderCost = 0.0;
 
@@ -224,6 +227,13 @@ public class DashboardController implements Initializable {
     }
 
 
+
+
+
+
+
+
+
     // Logout action
     public void logout(ActionEvent event) throws IOException {
         Session.clear();
@@ -255,7 +265,6 @@ public class DashboardController implements Initializable {
             customerNameField.clear();
             customerPhoneField.clear();
 
-            // Optional: refresh customer table here if implemented
         } else {
             customerStatsLabel.setText("❌ Failed to register customer.");
         }
@@ -363,7 +372,39 @@ public class DashboardController implements Initializable {
             showAlert("⚠️ Order saved but failed to save one or more items.");
         }
     }
+    @FXML
+    private void handleShowCustomerReport() {
+        openReportScene("customer");
+    }
 
+    @FXML
+    private void handleShowBranchesReport() {
+        openReportScene("performance");
+    }
+
+    @FXML
+    private void handleShowBranchSalesReport() {
+        openReportScene("branch");
+    }
+
+    @FXML
+    private void handleShowTotalReport() {
+        openReportScene("total");
+    }
+
+
+    private void openReportScene(String type) {
+        try {
+            ReportsController.setReportType(type);
+            Parent root = FXMLLoader.load(HelloApplication.class.getResource("reports.fxml"));
+            Stage reportStage = new Stage();
+            reportStage.setTitle("Sales Report");
+            reportStage.setScene(new Scene(root));
+            reportStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 
