@@ -33,7 +33,10 @@ public class OrderDao {
         return -1;
     }
 
-    public static List<Order> getAllOrders(String searchString) {
+    public static List<Order> getAllOrders(String branchname, String customer_name) {
+        if (branchname == null){ branchname = "";}
+        if (customer_name == null){customer_name = "";}
+
         List<Order> orders = new ArrayList<>();
 
         String sql = "SELECT \n" +
@@ -57,8 +60,8 @@ public class OrderDao {
             Connection conn = DBConnection.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
 
-            stmt.setString(1, "%" + searchString + "%");
-            stmt.setString(2, "%" + searchString + "%");
+            stmt.setString(1, "%" + customer_name + "%");
+            stmt.setString(2, "%" + branchname + "%");
 
             ResultSet rs = stmt.executeQuery();
 

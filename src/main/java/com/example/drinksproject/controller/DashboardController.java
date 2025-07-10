@@ -2,6 +2,8 @@ package com.example.drinksproject.controller;
 
 import com.example.drinksproject.HelloApplication;
 import com.example.drinksproject.Session;
+import com.example.drinksproject.dao.CustomerDao;
+import com.example.drinksproject.dao.OrderDao;
 import com.example.drinksproject.model.*;
 import com.example.drinksproject.rmi.shared.*;
 
@@ -15,6 +17,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -22,41 +25,74 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class DashboardController implements Initializable {
+public class DashboardController implements Initializable, CustomerService {
 
     // ========== FXML UI Bindings ==========
-    @FXML private TableView<Order> ordersTable;
-    @FXML private TableColumn<Order, String> orderIdCol;
-    @FXML private TableColumn<Order, String> customerCol;
-    @FXML private TableColumn<Order, String> branchCol;
-    @FXML private TableColumn<Order, String> itemsCol;
-    @FXML private TableColumn<Order, Double> amountCol;
-    @FXML private TableColumn<Order, String> dateCol;
+    @FXML
+    private TableView<Order> ordersTable;
+    @FXML
+    private TableColumn<Order, String> orderIdCol;
+    @FXML
+    private TableColumn<Order, String> customerCol;
+    @FXML
+    private TableColumn<Order, String> branchCol;
+    @FXML
+    private TableColumn<Order, String> itemsCol;
+    @FXML
+    private TableColumn<Order, Double> amountCol;
+    @FXML
+    private TableColumn<Order, String> dateCol;
 
-    @FXML private TabPane tabPane;
-    @FXML private Tab addOrderTab, customersTab, viewReportsTab;
-    @FXML private HBox quickActions;
-    @FXML private Button viewReportsLink;
+    @FXML
+    private TabPane tabPane;
+    @FXML
+    private Tab addOrderTab, customersTab, viewReportsTab;
+    @FXML
+    private HBox quickActions;
+    @FXML
+    private Button viewReportsLink;
 
-    @FXML private TextField customerNameField, customerPhoneField;
-    @FXML private Label customerStatsLabel;
-    @FXML private TableView<?> customersTable;
+    @FXML
+    private TextField customerNameField, customerPhoneField;
+    @FXML
+    private Label customerStatsLabel;
+    @FXML
+    private TableView<CustomerOrder> customersTable;
+    @FXML
+    private TableColumn<CustomerOrder, String> colCustomerName;
+    @FXML
+    private TableColumn<CustomerOrder, String> colCustomerID;
+    @FXML
+    private TableColumn<CustomerOrder, String> colCustomerPhone;
+    @FXML
+    private TableColumn<CustomerOrder, Integer> colTotalOrders;
 
-    @FXML private ChoiceBox<Customer> customerChoiceBox;
-    @FXML private ChoiceBox<Drink> drinkChoiceBox;
-    @FXML private TextField quantityField;
-    @FXML private Label itemPriceLabel;
-    @FXML private VBox orderItemsList;
-    @FXML private Label orderTotalLabel;
 
-    @FXML private Label todaySalesLabel, ordersCountLabel, customersCountLabel;
-    @FXML private TextField searchField;
-    @FXML private Label branchNameLabel;
+    @FXML
+    private ChoiceBox<Customer> customerChoiceBox;
+    @FXML
+    private ChoiceBox<Drink> drinkChoiceBox;
+    @FXML
+    private TextField quantityField;
+    @FXML
+    private Label itemPriceLabel;
+    @FXML
+    private VBox orderItemsList;
+    @FXML
+    private Label orderTotalLabel;
+
+    @FXML
+    private Label todaySalesLabel, ordersCountLabel, customersCountLabel;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private Label branchNameLabel;
 
     // ========== Internal Variables ==========
     private final List<OrderItem> orderItems = new ArrayList<>();
@@ -65,8 +101,8 @@ public class DashboardController implements Initializable {
 
     // RMI Services
     private OrderService orderService;
-    private CustomerService customerService;
     private DrinkService drinkService;
+    private CustomerService customerService;
 
     // Auto-refresh task
     private ScheduledExecutorService scheduler;
@@ -120,7 +156,7 @@ public class DashboardController implements Initializable {
 
     private void loadOrders(String search) {
         try {
-            List<OrderDTO> dtoList = orderService.getAllOrders(search);
+            List<OrderDTO> dtoList = orderService.getAllOrders("",search);
             List<Order> fxOrders = convertToJavaFXOrders(dtoList);
             ordersTable.setItems(FXCollections.observableArrayList(fxOrders));
         } catch (Exception e) {
@@ -131,7 +167,7 @@ public class DashboardController implements Initializable {
 
     private void loadCustomersFromRMI() {
         try {
-            List<Customer> customers = customerService.getAllCustomers();
+            List<Customer> customers = getAllCustomers();
             customerChoiceBox.setItems(FXCollections.observableArrayList(customers));
         } catch (Exception e) {
             showAlert("⚠️ Could not load customers: " + e.getMessage());
@@ -159,11 +195,35 @@ public class DashboardController implements Initializable {
 
     private void updateDashboardStats() {
         try {
-            customersCountLabel.setText(String.valueOf(customerService.getCustomerCount()));
+            customersCountLabel.setText(String.valueOf(getCustomerCount()));
+            customerStatsLabel.setText(String.valueOf(getCustomerCount()) + " customers have been registered!");
             ordersCountLabel.setText(String.valueOf(orderService.getOrderCount()));
             todaySalesLabel.setText(String.format("Ksh %.2f", orderService.getTotalSales()));
+
+            List<Customer> customers = getAllCustomers();
+            List<CustomerOrder> customerorders = new ArrayList<>();
+
+            colCustomerID.setCellValueFactory(new PropertyValueFactory<>("id"));
+            colCustomerName.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+            colCustomerPhone.setCellValueFactory(new PropertyValueFactory<>("customerPhone"));
+            colTotalOrders.setCellValueFactory(new PropertyValueFactory<>("totalOrders"));
+
+
+            for (Customer customer : customers) {
+                CustomerOrder order = new CustomerOrder(String.valueOf(customer.getId()),
+                        customer.getName(), customer.getPhone(), OrderDao.getAllOrders(
+                                "",
+                        customer.getName()
+                ).size());
+
+                customerorders.add(order);
+            }
+
+            customersTable.setItems(FXCollections.observableArrayList(customerorders));
+
         } catch (Exception e) {
             showAlert("⚠️ Failed to load dashboard stats: " + e.getMessage());
+            System.out.print(e.getMessage());
         }
     }
 
@@ -182,6 +242,18 @@ public class DashboardController implements Initializable {
                 }
             });
         }, 0, 10, TimeUnit.SECONDS); // Refresh every 10 seconds
+    }
+
+    public List<Customer> getAllCustomers() {
+        return CustomerDao.getAllCustomers();
+    }
+
+    public boolean registerCustomer(String name, String phone) {
+        return CustomerDao.registerUser(name, phone);
+    }
+
+    public int getCustomerCount() {
+        return CustomerDao.getAllCustomers().toArray().length;
     }
 
     // ========== UI Button Actions ==========
@@ -232,7 +304,7 @@ public class DashboardController implements Initializable {
         }
 
         try {
-            boolean success = customerService.registerCustomer(name, phone);
+            boolean success = registerCustomer(name, phone);
             if (success) {
                 customerStatsLabel.setText("✅ Customer registered remotely!");
                 customerNameField.clear();
@@ -348,3 +420,5 @@ public class DashboardController implements Initializable {
         alert.showAndWait();
     }
 }
+
+

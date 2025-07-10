@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public interface OrderService extends Remote {
     int placeOrder(int customerId, int branchId) throws RemoteException;
     boolean addOrderItem(int orderId, int drinkId, int quantity, double totalPrice) throws RemoteException;
-    List<OrderDTO> getAllOrders(String searchString) throws RemoteException;
+    List<OrderDTO> getAllOrders(String customer_name, String branchname) throws RemoteException;
     int getOrderCount() throws RemoteException;
     double getTotalSales() throws RemoteException;
 
