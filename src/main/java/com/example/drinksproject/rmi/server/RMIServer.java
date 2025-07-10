@@ -28,6 +28,9 @@ public class RMIServer {
             Naming.rebind(RMIConfig.getURL("StockService"), new StockServiceImpl());
             System.out.println("✅ StockService bound to RMI registry.");
 
+            Naming.rebind(RMIConfig.getURL("BranchService"), new BranchServiceImpl());
+            System.out.println("✅ StockService bound to RMI registry.");
+
             System.out.println("🚀 RMI Server is up at: " + RMIConfig.getURL("AnyService"));
         } catch (Exception e) {
             System.err.println("❌ Failed to start RMI server:");
