@@ -204,6 +204,8 @@ public class DashboardController implements Initializable, CustomerService {
         try {
             List<Drink> drinks = drinkService.getAllDrinks();
             drinkChoiceBox.setItems(FXCollections.observableArrayList(drinks));
+            stockDrinkChoiceBox.setItems(FXCollections.observableArrayList(drinks));
+
         } catch (Exception e) {
             showAlert("⚠️ Could not load drinks: " + e.getMessage());
             e.printStackTrace();

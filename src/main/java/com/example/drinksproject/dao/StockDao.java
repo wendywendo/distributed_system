@@ -152,4 +152,60 @@ public class StockDao {
         return stocks;
     }
 
+    public static void initializeStockForAllBranches(int defaultQuantity) {
+        String getBranchesQuery = "SELECT branch_id FROM branch";
+        String getDrinksQuery = "SELECT drink_id FROM drink";
+        String checkStockQuery = "SELECT COUNT(*) FROM stock WHERE branch_id = ? AND drink_id = ?";
+        String insertStockQuery = "INSERT INTO stock(branch_id, drink_id, quantity) VALUES (?, ?, ?)";
+
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement getBranchesStmt = conn.prepareStatement(getBranchesQuery);
+            ResultSet branchRs = getBranchesStmt.executeQuery();
+
+            while (branchRs.next()) {
+                int branchId = branchRs.getInt("branch_id");
+
+                try {
+                    PreparedStatement getDrinksStmt = conn.prepareStatement(getDrinksQuery);
+                    ResultSet drinksRs = getDrinksStmt.executeQuery();
+
+                    while (drinksRs.next()) {
+                        int drinkId = drinksRs.getInt("drink_id");
+
+                        // Check if stock already exists
+                        try {
+                            PreparedStatement checkStmt = conn.prepareStatement(checkStockQuery);
+                            checkStmt.setInt(1, branchId);
+                            checkStmt.setInt(2, drinkId);
+
+                            ResultSet checkRs = checkStmt.executeQuery();
+
+                            if (checkRs.next() && checkRs.getInt(1) == 0) {
+                                // Insert stock
+                                try {
+                                    PreparedStatement insertStmt = conn.prepareStatement(insertStockQuery);
+                                    insertStmt.setInt(1, branchId);
+                                    insertStmt.setInt(2, drinkId);
+                                    insertStmt.setInt(3, defaultQuantity);
+                                    insertStmt.executeUpdate();
+                                } catch (SQLException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } catch (SQLException | RuntimeException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
