@@ -2,6 +2,7 @@ package com.example.drinksproject.dao;
 
 import com.example.drinksproject.DBConnection;
 import com.example.drinksproject.Order;
+import com.example.drinksproject.Session;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,7 +49,7 @@ public class OrderDao {
                 "JOIN branch b ON o.branch_id = b.branch_id\n" +
                 "JOIN orderitem oi ON o.order_id = oi.order_id\n" +
                 "JOIN drink d ON oi.drink_id = d.drink_id\n" +
-                "WHERE customer_name LIKE ? OR branch_name LIKE ?\n" +
+                "WHERE customer_name LIKE ? AND branch_name = ?\n" +
                 "GROUP BY o.order_id, c.customer_name, b.branch_name, o.order_date\n" +
                 "ORDER BY o.order_date DESC;\n";
 
@@ -58,7 +59,7 @@ public class OrderDao {
             PreparedStatement stmt = conn.prepareStatement(sql);
 
             stmt.setString(1, "%" + searchString + "%");
-            stmt.setString(2, "%" + searchString + "%");
+            stmt.setString(2, Session.getBranchName());
 
             ResultSet rs = stmt.executeQuery();
 

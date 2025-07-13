@@ -1,6 +1,6 @@
 package com.example.drinksproject;
 
-import com.mysql.cj.x.protobuf.MysqlxCrud;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -19,38 +19,23 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.Key;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import com.example.drinksproject.dao.*;
 import com.example.drinksproject.model.*;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.ChoiceBox;
-
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.util.Duration;
-
-import javax.swing.*;
-import java.net.URL;
 import java.util.*;
 
 
 
 public class DashboardController implements Initializable {
+
 
     private Stage stage;
     private Scene scene;
@@ -64,6 +49,16 @@ public class DashboardController implements Initializable {
     @FXML private TableColumn<Order, Double> amountCol;
     @FXML private TableColumn<Order, String> dateCol;
 
+    @FXML private TableView<Customer> customersTable;
+    @FXML private TableColumn<Customer, String> customerIdCol;
+    @FXML private TableColumn<Customer, String> customerNameCol;
+    @FXML private TableColumn<Customer, String> customerPhoneCol;
+
+    @FXML private TableView<Stock> stocksTable;
+    @FXML private TableColumn<Stock, String> stockBranchNameCol;
+    @FXML private TableColumn<Stock, String> stockDrinkNameCol;
+    @FXML private TableColumn<Stock, String> currentStockCol;
+
     @FXML private TabPane tabPane;
     @FXML private Tab addOrderTab;
     @FXML private Tab customersTab;
@@ -75,7 +70,6 @@ public class DashboardController implements Initializable {
     @FXML private TextField customerNameField;
     @FXML private TextField customerPhoneField;
     @FXML private Label customerStatsLabel;
-    @FXML private TableView<?> customersTable; // You can type this more specifically later if needed
 
     @FXML private ChoiceBox<Customer> customerChoiceBox;
     @FXML private ChoiceBox<Drink> drinkChoiceBox;
@@ -92,8 +86,10 @@ public class DashboardController implements Initializable {
     @FXML private TextField searchField;
     @FXML private Label branchNameLabel;
 
-
-
+    @FXML private ChoiceBox<Drink> stockDrinkChoiceBox;
+    @FXML private ChoiceBox<Branch> stockBranchChoiceBox;
+    @FXML private TextField stockAddQuantityField;
+    @FXML private Button restockButton;
 
     private final List<OrderItem> orderItems = new ArrayList<>();
     private double totalOrderCost = 0.0;
@@ -111,6 +107,27 @@ public class DashboardController implements Initializable {
         amountCol.setCellValueFactory(cell -> cell.getValue().amountProperty().asObject());
         dateCol.setCellValueFactory(cell -> cell.getValue().dateProperty());
 
+        customerIdCol.setCellValueFactory(cell -> cell.getValue().customerIdProperty().asString());
+        customerNameCol.setCellValueFactory(cell -> cell.getValue().customerNameProperty());
+        customerPhoneCol.setCellValueFactory(cell -> cell.getValue().customerPhoneProperty());
+
+        stockBranchNameCol.setCellValueFactory(cell -> cell.getValue().branchNameProperty());
+        stockDrinkNameCol.setCellValueFactory(cell -> cell.getValue().drinkNameProperty());
+        currentStockCol.setCellValueFactory(cell -> cell.getValue().currentStockProperty().asString());
+
+        // Load stocks
+        List<Stock> stocksList = StockDao.getAllStocks();
+        ObservableList<Stock> stocksObservable = FXCollections.observableArrayList(
+                stocksList
+        );
+        stocksTable.setItems(stocksObservable);
+
+        // Load customers
+        List<Customer> customersList = CustomerDao.getAllCustomers();
+        ObservableList<Customer> customersObservable = FXCollections.observableArrayList(
+                customersList
+        );
+        customersTable.setItems(customersObservable);
 
         // Load orders
         List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
@@ -118,6 +135,9 @@ public class DashboardController implements Initializable {
                 ordersList
         );
         ordersTable.setItems(orders);
+
+        // Set customer stats label
+        customerStatsLabel.setText(String.valueOf(CustomerDao.getCustomersCount()) + " Registered Customers");
 
         // Show the reports only when current user isHeadquarters
         // Implement function to check this
@@ -135,6 +155,7 @@ public class DashboardController implements Initializable {
         // Load drink list
         List<Drink> drinks = DrinkDao.getAllDrinks();
         drinkChoiceBox.setItems(FXCollections.observableArrayList(drinks));
+        stockDrinkChoiceBox.setItems(FXCollections.observableArrayList(drinks));
 
         drinkChoiceBox.setOnAction(event -> {
             Drink selected = drinkChoiceBox.getValue();
@@ -145,6 +166,10 @@ public class DashboardController implements Initializable {
       
         // Set branch name label
         branchNameLabel.setText(Session.getBranchName().toUpperCase() + " BRANCH");
+
+        // Load branches list
+        List<Branch> branches = getAllBranches();
+        stockBranchChoiceBox.setItems(FXCollections.observableArrayList(branches));
 
         //updating the stats
         updateDashboardStats();
@@ -174,10 +199,35 @@ public class DashboardController implements Initializable {
         tabPane.getSelectionModel().select(viewReportsTab);
     }
 
-                    //DASHBOARD STATS
+    public static List<Branch> getAllBranches() {
+        String query = "SELECT branch_id, branch_name FROM branch";
+
+        List<Branch> branches = new ArrayList<>();
+        try {
+            Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                branches.add(new Branch(
+                        rs.getInt("branch_id"),
+                        rs.getString("branch_name")
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error: " + e);
+        }
+
+        return branches;
+    }
+
+    //DASHBOARD STATS
     public static int getAllCustomers() {
         String query = "SELECT COUNT(customer_id) FROM customer";
-        try(Connection connection= DBConnection.getConnection(); PreparedStatement statement =connection.prepareStatement(query); ResultSet resultSet = statement.executeQuery()) {
+        try(Connection connection= DBConnection.getConnection();
+            PreparedStatement statement =connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery()) {
             if (resultSet.next()) {
                 return resultSet.getInt(1);
             }
@@ -265,13 +315,21 @@ public class DashboardController implements Initializable {
             customerNameField.clear();
             customerPhoneField.clear();
 
+            // Optional: refresh customer table here if implemented
+            List<Customer> customersList = CustomerDao.getAllCustomers();
+            ObservableList<Customer> customersObservable = FXCollections.observableArrayList(
+                    customersList
+            );
+            customersTable.setItems(customersObservable);
+
+            customerStatsLabel.setText(String.valueOf(CustomerDao.getCustomersCount()) + " Registered Customers");
         } else {
             customerStatsLabel.setText("❌ Failed to register customer.");
         }
     }
 
 
-//    Handle add item
+    // Handle add item
     @FXML
     private void handleAddItem(ActionEvent event) {
         Drink selectedDrink = drinkChoiceBox.getValue();
@@ -319,6 +377,26 @@ public class DashboardController implements Initializable {
         alert.showAndWait();
     }
 
+    // Low stock warning
+    private void showLowStockWarnings() {
+        int lowStockThreshold = 10;
+        List<Stock> lowStocks = StockDao.getLowStockItems(lowStockThreshold);
+
+        if (!lowStocks.isEmpty()) {
+            StringBuilder message = new StringBuilder("Low stock alerts:\n\n");
+            for (Stock s : lowStocks) {
+                message.append(String.format("- %s at %s: %d left\n", s.getDrinkName(), s.getBranchName(), s.getCurrentStock()));
+            }
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Low Stock Warning");
+            alert.setHeaderText("Some items are running low!");
+            alert.setContentText(message.toString());
+            alert.showAndWait();
+        }
+    }
+
+
     //   Handle place order new implementation
     @FXML
     private void handlePlaceOrder(ActionEvent event) {
@@ -347,8 +425,22 @@ public class DashboardController implements Initializable {
 
         boolean allItemsInserted = true;
         for (OrderItem item : orderItems) {
-            boolean success = OrderItemDao.insertOrderItem(orderId, item.getDrinkId(), item.getQuantity(), item.getTotalPrice());
-            if (!success) {
+
+            double unitPrice = DrinkDao.getDrinkPrice(item.getDrinkName());
+            double calculatedTotalPrice = unitPrice * item.getQuantity();
+
+            boolean success = OrderItemDao.insertOrderItem(
+                    orderId,
+                    item.getDrinkId(),
+                    item.getQuantity(),
+                    calculatedTotalPrice
+            );
+            if (success) {
+                // Update stock
+                if (!StockDao.deductStock(branchId, item.getDrinkId(), item.getQuantity())) {
+                    allItemsInserted = false;
+                }
+            } else {
                 allItemsInserted = false;
                 break;
             }
@@ -368,6 +460,15 @@ public class DashboardController implements Initializable {
             List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
             ObservableList<Order> orders = FXCollections.observableArrayList(ordersList);
             ordersTable.setItems(orders);
+
+            // Reload stocks table
+            List<Stock> stocksList = StockDao.getAllStocks();
+            ObservableList<Stock> stocksObservable = FXCollections.observableArrayList(
+                    stocksList
+            );
+            stocksTable.setItems(stocksObservable);
+
+            showLowStockWarnings();
         } else {
             showAlert("⚠️ Order saved but failed to save one or more items.");
         }
@@ -406,8 +507,47 @@ public class DashboardController implements Initializable {
         }
     }
 
+    // Restock button
+    @FXML
+    private void handleRestock(ActionEvent event) {
+        Branch selectedBranch = stockBranchChoiceBox.getValue();
+        Drink selectedDrink = stockDrinkChoiceBox.getValue();
+        String qtyText = stockAddQuantityField.getText().trim();
 
+        if (selectedBranch == null || selectedDrink == null || qtyText.isEmpty()) {
+            showAlert("❗ Please select a branch, a drink, and enter quantity.");
+            return;
+        }
 
+        int quantity;
+        try {
+            quantity = Integer.parseInt(qtyText);
+            if (quantity <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            showAlert("❗ Quantity must be a positive number.");
+            return;
+        }
+
+        boolean success = StockDao.addStock(selectedBranch.getBranchId(), selectedDrink.getId(), quantity);
+
+        if (success) {
+            showAlert("✅ Restocked successfully.");
+
+            // Reload stocks table
+            List<Stock> stocksList = StockDao.getAllStocks();
+            ObservableList<Stock> stocksObservable = FXCollections.observableArrayList(
+                    stocksList
+            );
+            stocksTable.setItems(stocksObservable);
+
+            // Clear input fields
+            stockAddQuantityField.clear();
+            stockBranchChoiceBox.setValue(null);
+            stockDrinkChoiceBox.setValue(null);
+        } else {
+            showAlert("❌ Failed to restock.");
+        }
+    }
 
 
 }

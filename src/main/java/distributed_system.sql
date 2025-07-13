@@ -50,10 +50,22 @@ CREATE TABLE admin (
     FOREIGN KEY (branch_id) REFERENCES branch(branch_id)
 );
 
+CREATE TABLE stock (
+    stock_id INT AUTO_INCREMENT PRIMARY KEY,
+    branch_id INT NOT NULL,
+    drink_id INT NOT NULL,
+    quantity INT NOT NULL,
+
+    FOREIGN KEY (branch_id) REFERENCES branch(branch_id),
+    FOREIGN KEY (drink_id) REFERENCES drink(drink_id),
+);
+
 INSERT INTO branch (branch_name) VALUES
 ('Nairobi'),
 ('Mombasa'),
-('Nakuru');
+('Nakuru'),
+('Kisumu');
+
 
 INSERT INTO admin (username, password, branch_id)
 VALUES ('admin1', 'adminpass', 1);

@@ -664,6 +664,67 @@
                         </AnchorPane>
                     </content>
                 </Tab>
+
+                <!-- Stock Management Tab -->
+                <Tab fx:id="stockTab" text="Stock Management">
+                    <content>
+                        <AnchorPane style="-fx-background-color: transparent;">
+                            <children>
+                                <VBox spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <!-- Stock Header -->
+                                        <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                                            <children>
+                                                <Label text="Stock Management" textFill="#1f2937">
+                                                    <font>
+                                                        <Font name="System Bold" size="18.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label text="Monitor and update stock levels per branch." textFill="#6b7280">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                            </padding>
+                                        </VBox>
+
+                                        <!-- Stock Table -->
+                                        <TableView fx:id="stocksTable" prefHeight="400.0" style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 5;">
+                                            <columns>
+                                                <TableColumn fx:id="stockBranchNameCol" prefWidth="250.0" text="Branch Name" />
+                                                <TableColumn fx:id="stockDrinkNameCol" prefWidth="150.0" text="Drink" />
+                                                <TableColumn fx:id="currentStockCol" prefWidth="150.0" text="Current Stock" />
+                                            </columns>
+                                        </TableView>
+
+                                        <!-- Add to Stock Section -->
+                                        <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                            <children>
+                                    <ChoiceBox fx:id="stockBranchChoiceBox" prefWidth="150.0" />
+                                                <ChoiceBox fx:id="stockDrinkChoiceBox" prefWidth="200.0" />
+                                                <TextField fx:id="stockAddQuantityField" prefWidth="100.0" promptText="Add Qty" />
+                                                <Button fx:id="restockButton" onAction="#handleRestock" prefHeight="35.0" prefWidth="140.0" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Restock" />
+                                            </children>
+                                        </HBox>
+
+                                        <!-- Notification Label -->
+                                        <Label fx:id="stockNotificationLabel" textFill="#dc2626" visible="false">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
             </tabs>
         </TabPane>
     </children>
