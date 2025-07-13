@@ -183,11 +183,11 @@
                                                 <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
                                             </padding>
                                         </VBox>
-                              <Button mnemonicParsing="false" onAction="#logout" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Logout">
-                                 <font>
-                                    <Font size="12.0" />
-                                 </font>
-                              </Button>
+                                        <Button mnemonicParsing="false" onAction="#logout" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;" text="Logout">
+                                            <font>
+                                                <Font size="12.0" />
+                                            </font>
+                                        </Button>
                                     </children>
                                     <padding>
                                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -478,6 +478,8 @@
                                                         <TableColumn fx:id="customerIdCol" prefWidth="120.0" text="Customer ID" />
                                                         <TableColumn fx:id="customerNameCol" prefWidth="300.0" text="Customer Name" />
                                                         <TableColumn fx:id="customerPhoneCol" prefWidth="200.0" text="Phone Number" />
+                                                        <TableColumn fx:id="customerTotalOrdersCol" prefWidth="150.0" text="Total Orders" />
+                                                        <TableColumn fx:id="actionsCol" prefWidth="150.0" text="Actions" />
                                                     </columns>
                                                 </TableView>
                                             </children>
@@ -547,11 +549,11 @@
                                                         </Label>
                                                         <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #2563eb; -fx-background-radius: 5;">
                                                             <children>
-                                                                <Label text="View Report" textFill="WHITE">
+                                                                <Button text="View Report"  onAction="#handleShowCustomerReport" textFill="WHITE">
                                                                     <font>
                                                                         <Font name="System Bold" size="14.0" />
                                                                     </font>
-                                                                </Label>
+                                                                </Button>
                                                             </children>
                                                         </HBox>
                                                     </children>
@@ -575,11 +577,11 @@
                                                         </Label>
                                                         <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #059669; -fx-background-radius: 5;">
                                                             <children>
-                                                                <Label text="View Report" textFill="WHITE">
+                                                                <Button text="View Report" onAction="#handleShowBranchesReport" textFill="WHITE">
                                                                     <font>
                                                                         <Font name="System Bold" size="14.0" />
                                                                     </font>
-                                                                </Label>
+                                                                </Button>
                                                             </children>
                                                         </HBox>
                                                     </children>
@@ -603,11 +605,11 @@
                                                         </Label>
                                                         <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #7c3aed; -fx-background-radius: 5;">
                                                             <children>
-                                                                <Label text="View Report" textFill="WHITE">
+                                                                <Button text="View Report" onAction="#handleShowBranchSalesReport" textFill="WHITE">
                                                                     <font>
                                                                         <Font name="System Bold" size="14.0" />
                                                                     </font>
-                                                                </Label>
+                                                                </Button>
                                                             </children>
                                                         </HBox>
                                                     </children>
@@ -631,11 +633,11 @@
                                                         </Label>
                                                         <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #d97706; -fx-background-radius: 5;">
                                                             <children>
-                                                                <Label text="View Report" textFill="WHITE">
+                                                                <Button text="View Report" onAction="#handleShowTotalReport" textFill="WHITE">
                                                                     <font>
                                                                         <Font name="System Bold" size="14.0" />
                                                                     </font>
-                                                                </Label>
+                                                                </Button>
                                                             </children>
                                                         </HBox>
                                                     </children>
@@ -648,12 +650,17 @@
                                                 <Insets />
                                             </VBox.margin>
                                         </GridPane>
+                                        <!-- After </GridPane> -->
+
+
                                     </children>
                                     <padding>
                                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                     </padding>
+
                                 </VBox>
                             </children>
+
                         </AnchorPane>
                     </content>
                 </Tab>
@@ -722,3 +729,4 @@
         </TabPane>
     </children>
 </AnchorPane>
+

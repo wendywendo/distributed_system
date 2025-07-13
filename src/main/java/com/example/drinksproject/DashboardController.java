@@ -277,6 +277,13 @@ public class DashboardController implements Initializable {
     }
 
 
+
+
+
+
+
+
+
     // Logout action
     public void logout(ActionEvent event) throws IOException {
         Session.clear();
@@ -464,6 +471,39 @@ public class DashboardController implements Initializable {
             showLowStockWarnings();
         } else {
             showAlert("⚠️ Order saved but failed to save one or more items.");
+        }
+    }
+    @FXML
+    private void handleShowCustomerReport() {
+        openReportScene("customer");
+    }
+
+    @FXML
+    private void handleShowBranchesReport() {
+        openReportScene("performance");
+    }
+
+    @FXML
+    private void handleShowBranchSalesReport() {
+        openReportScene("branch");
+    }
+
+    @FXML
+    private void handleShowTotalReport() {
+        openReportScene("total");
+    }
+
+
+    private void openReportScene(String type) {
+        try {
+            ReportsController.setReportType(type);
+            Parent root = FXMLLoader.load(HelloApplication.class.getResource("reports.fxml"));
+            Stage reportStage = new Stage();
+            reportStage.setTitle("Sales Report");
+            reportStage.setScene(new Scene(root));
+            reportStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
