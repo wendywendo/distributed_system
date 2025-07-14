@@ -45,4 +45,6 @@ public class StockServiceImpl extends UnicastRemoteObject implements StockServic
     public List<Branch> getAllBranches() throws RemoteException {
         return BranchDao.getAllBranches();
     }
+
+
 }

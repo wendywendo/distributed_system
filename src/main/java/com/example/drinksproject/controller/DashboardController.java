@@ -143,6 +143,7 @@ public class DashboardController implements Initializable, CustomerService {
         updateDashboardStats();
         loadStocksFromRMI();
         loadBranchesToChoiceBox();
+        showLowStockWarnings();
 
 
         startAutoRefresh();
@@ -410,16 +411,22 @@ public class DashboardController implements Initializable, CustomerService {
             boolean allItemsInserted = true;
             for (OrderItem item : orderItems) {
                 boolean success = orderService.addOrderItem(orderId, item.getDrinkId(), item.getQuantity(), item.getTotalPrice());
+
                 if (!success) {
                     allItemsInserted = false;
                     break;
                 }
+
+                // Reduce stock for the branch
+                stockService.deductStock(item.getDrinkId(), branchId, item.getQuantity());
             }
+
 
             if (allItemsInserted) {
                 showAlert("✅ Order placed successfully!");
                 resetOrderForm();
                 loadOrders(searchField.getText().trim());
+                showLowStockWarnings();
             } else {
                 showAlert("⚠️ Order saved but failed to save one or more items.");
             }
