@@ -445,7 +445,6 @@ private void loadStocksFromRMI() {
         String currentBranch = Session.getBranchName(); // replace with your actual session class
         List<Stock> stockList = stockService.getAllStocks(currentBranch);
         stocksTable.setItems(FXCollections.observableArrayList(stockList));
-        showLowStockWarnings();
     } catch (Exception e) {
         showAlert("⚠️ Failed to load stock data: " + e.getMessage());
     }
