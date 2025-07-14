@@ -146,6 +146,7 @@ public class DashboardController implements Initializable, CustomerService {
         showLowStockWarnings();
 
 
+
         startAutoRefresh();
 
         if (!isHeadquarters) {
@@ -265,6 +266,7 @@ public class DashboardController implements Initializable, CustomerService {
                     loadCustomersFromRMI();
                     loadDrinksFromRMI();
                     updateDashboardStats();
+                    loadStocksFromRMI();
                 } catch (Exception e) {
                     System.err.println("Auto-refresh error: " + e.getMessage());
                 }
