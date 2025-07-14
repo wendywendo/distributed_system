@@ -69,6 +69,8 @@ INSERT INTO branch (branch_name) VALUES
 
 INSERT INTO admin (username, password, branch_id)
 VALUES ('admin1', 'adminpass', 1);
+INSERT INTO admin (username, password, branch_id)
+VALUES ('admin2', 'adminpass', 2);
 
 
 
