@@ -42,12 +42,15 @@ public class StockDao {
                 "FROM stock s " +
                 "JOIN drink d ON s.drink_id = d.drink_id " +
                 "JOIN branch b ON s.branch_id = b.branch_id " +
-                "WHERE s.quantity < ?";
+                "WHERE s.drink_id IN (" +
+                "    SELECT drink_id FROM stock WHERE quantity < ?" +
+                ") AND (b.branch_name = 'Nairobi' OR s.quantity < ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, threshold);
+            stmt.setInt(2, threshold);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -64,6 +67,7 @@ public class StockDao {
 
         return lowStocks;
     }
+
 
     public static boolean addStock(int branchId, int drinkId, int quantityToAdd) {
         String sql = "UPDATE stock SET quantity = quantity + ? WHERE branch_id = ? AND drink_id = ?";
@@ -207,5 +211,37 @@ public class StockDao {
             e.printStackTrace();
         }
     }
+
+    public static List<Stock> getLowStockForBranch(int branchId, int threshold) {
+        List<Stock> lowStocks = new ArrayList<>();
+        String sql = "SELECT d.drink_name, b.branch_name, s.quantity " +
+                "FROM stock s " +
+                "JOIN drink d ON s.drink_id = d.drink_id " +
+                "JOIN branch b ON s.branch_id = b.branch_id " +
+                "WHERE s.branch_id = ? AND s.quantity < ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, branchId);
+            stmt.setInt(2, threshold);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lowStocks.add(new Stock(
+                        rs.getString("branch_name"),
+                        rs.getString("drink_name"),
+                        rs.getInt("quantity")
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lowStocks;
+    }
+
 
 }
