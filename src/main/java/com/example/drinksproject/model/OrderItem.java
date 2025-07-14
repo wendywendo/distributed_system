@@ -5,7 +5,7 @@ import javafx.beans.property.*;
 public class OrderItem {
     private final IntegerProperty drinkId = new SimpleIntegerProperty();
     private final StringProperty drinkName = new SimpleStringProperty();
-    private final IntegerProperty quantity = new SimpleIntegerProperty();
+    private IntegerProperty quantity = new SimpleIntegerProperty();
     private final DoubleProperty price = new SimpleDoubleProperty();
 
     public OrderItem(int drinkId, String drinkName, int quantity, double price) {
@@ -18,6 +18,11 @@ public class OrderItem {
     public int getDrinkId() { return drinkId.get(); }
     public String getDrinkName() { return drinkName.get(); }
     public int getQuantity() { return quantity.get(); }
+    public double getPrice() { return price.get(); }
+
+    public void setQuantity(int quantity) {
+        this.quantity = new SimpleIntegerProperty(quantity);
+    }
 
     public double getTotalPrice() {
         double totalPrice = this.quantity.get() * this.price.get();

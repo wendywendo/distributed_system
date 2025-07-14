@@ -2,6 +2,7 @@ package com.example.drinksproject.dao;
 
 import com.example.drinksproject.DBConnection;
 import com.example.drinksproject.Order;
+import com.example.drinksproject.Session;
 import com.example.drinksproject.model.Stock;
 
 import java.sql.Connection;
@@ -135,7 +136,7 @@ public class StockDao {
         return false;
     }
 
-    public static boolean isOutOfStock(int branchId, int drinkId) {
+    public static boolean isOutOfStock(int branchId, int drinkId, int qtyToRemove) {
         String sql = "SELECT quantity FROM stock WHERE branch_id =? AND drink_id = ?";
 
         try (Connection connection = DBConnection.getConnection();
@@ -145,8 +146,8 @@ public class StockDao {
             statement.setInt(2, drinkId);
 
             ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                return resultSet.getInt("quantity") <= 0;
+            if (resultSet.next()) {
+                return (resultSet.getInt("quantity") - qtyToRemove) < 0;
             }
         }catch (Exception e){
             System.out.println("Stock check Error" +e);
@@ -156,19 +157,37 @@ public class StockDao {
 
     public static List<Stock> getAllStocks() {
         List<Stock> stocks = new ArrayList<>();
+
+        String currentBranch = Session.getBranchName();
+
+        // Check if branch is headquarters
+        // If it is, show stocks for all branches
+        // Else, show stock for current branch only
+        boolean isHQ = currentBranch.equalsIgnoreCase("nairobi");
+
         String sql = "SELECT \n" +
                 "    d.drink_name AS drink,\n" +
                 "    b.branch_name AS branch,\n" +
                 "    s.quantity AS current_stock\n" +
                 "FROM stock s\n" +
                 "JOIN drink d ON s.drink_id = d.drink_id\n" +
-                "JOIN branch b ON s.branch_id = b.branch_id\n" +
-                "ORDER BY b.branch_name, d.drink_name;\n";
+                "JOIN branch b ON s.branch_id = b.branch_id\n";
+
+        if (!isHQ) {
+            sql += "WHERE b.branch_name = ?\n";
+        }
+
+        sql += "ORDER BY b.branch_name, d.drink_name;";
 
         try {
 
             Connection conn = DBConnection.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
+
+            if (!isHQ) {
+                stmt.setString(1, currentBranch);
+            }
+
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {

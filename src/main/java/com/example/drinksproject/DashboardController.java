@@ -1,6 +1,7 @@
 package com.example.drinksproject;
 
 
+import com.sun.tools.jconsole.JConsoleContext;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -91,7 +92,7 @@ public class DashboardController implements Initializable {
     @FXML private TextField stockAddQuantityField;
     @FXML private Button restockButton;
 
-    private final List<OrderItem> orderItems = new ArrayList<>();
+    private List<OrderItem> orderItems = new ArrayList<>();
     private double totalOrderCost = 0.0;
 
     boolean isHeadquarters;
@@ -99,6 +100,13 @@ public class DashboardController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Show "Reports" tab only when isHQ
+        boolean isHQ = Session.getBranchName().equalsIgnoreCase("nairobi");
+
+        if (!isHQ) {
+            tabPane.getTabs().remove(viewReportsTab); // Hide tab if not HQ
+        }
+
         // Bind properties
         orderIdCol.setCellValueFactory(cell -> cell.getValue().orderIdProperty().asString());
         customerCol.setCellValueFactory(cell -> cell.getValue().customerProperty());
@@ -277,13 +285,6 @@ public class DashboardController implements Initializable {
     }
 
 
-
-
-
-
-
-
-
     // Logout action
     public void logout(ActionEvent event) throws IOException {
         Session.clear();
@@ -349,25 +350,34 @@ public class DashboardController implements Initializable {
             return;
         }
 
-        double price = selectedDrink.getPrice();
-        double itemTotal = price * quantity;
+        // Check if item is out of stock
+        if (StockDao.isOutOfStock(Session.getBranchId(), selectedDrink.getId(), quantity)) {
+            // Item is out of stock
+            showAlert("❗ Insufficient items to perform required order!");
 
-        OrderItem item = new OrderItem(selectedDrink.getId(), selectedDrink.getName(), quantity, price);
-        orderItems.add(item);
+        } else {
 
-        // Display item in orderItemsList (VBox)
-        Label itemLabel = new Label(selectedDrink.getName() + " x" + quantity + " - Ksh " + itemTotal);
-        itemLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #374151;");
-        orderItemsList.getChildren().add(itemLabel);
+            double price = selectedDrink.getPrice();
+            double itemTotal = price * quantity;
 
-        // Update total
-        totalOrderCost += itemTotal;
-        orderTotalLabel.setText("Ksh " + totalOrderCost);
+            OrderItem item = new OrderItem(selectedDrink.getId(), selectedDrink.getName(), quantity, price);
+            orderItems.add(item);
 
-        // Reset input fields
-        drinkChoiceBox.setValue(null);
-        quantityField.clear();
-        itemPriceLabel.setText("Ksh 0");
+            // Display item in orderItemsList (VBox)
+            Label itemLabel = new Label(selectedDrink.getName() + " x" + quantity + " - Ksh " + itemTotal);
+            itemLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #374151;");
+            orderItemsList.getChildren().add(itemLabel);
+
+            // Update total
+            totalOrderCost += itemTotal;
+            orderTotalLabel.setText("Ksh " + totalOrderCost);
+
+            // Reset input fields
+            drinkChoiceBox.setValue(null);
+            quantityField.clear();
+            itemPriceLabel.setText("Ksh 0");
+
+        }
     }
 
     private void showAlert(String message) {
@@ -396,6 +406,30 @@ public class DashboardController implements Initializable {
         }
     }
 
+    // Group orderItems by drink to efficiently check stock
+    public List<OrderItem> groupOrderItemsByDrink(List<OrderItem> orderItems) {
+        Map<Integer, OrderItem> grouped = new LinkedHashMap<>();
+
+        for (OrderItem item : orderItems) {
+            int drinkId = item.getDrinkId();
+
+            if (grouped.containsKey(drinkId)) {
+                OrderItem existing = grouped.get(drinkId);
+                existing.setQuantity(existing.getQuantity() + item.getQuantity());
+            } else {
+                grouped.put(drinkId, new OrderItem(
+                        item.getDrinkId(),
+                        item.getDrinkName(),
+                        item.getQuantity(),
+                        item.getPrice()
+                ));
+            }
+        }
+
+        return new ArrayList<>(grouped.values());
+    }
+
+
 
     //   Handle place order new implementation
     @FXML
@@ -414,6 +448,17 @@ public class DashboardController implements Initializable {
 
         // Get current branch Id
         int branchId = Session.getBranchId();
+
+        orderItems = groupOrderItemsByDrink(orderItems);
+
+        // First, check stock availability for all items
+        for (OrderItem item : orderItems) {
+            boolean hasStock = !StockDao.isOutOfStock(branchId, item.getDrinkId(), item.getQuantity());
+            if (!hasStock) {
+                showAlert("❌ Cannot place order. Insufficient stock for: " + item.getDrinkName());
+                return;
+            }
+        }
 
         // Insert order
         int orderId = OrderDao.insertOrder(selectedCustomer.getId(), branchId);
@@ -435,6 +480,7 @@ public class DashboardController implements Initializable {
                     item.getQuantity(),
                     calculatedTotalPrice
             );
+
             if (success) {
                 // Update stock
                 if (!StockDao.deductStock(branchId, item.getDrinkId(), item.getQuantity())) {
@@ -442,19 +488,14 @@ public class DashboardController implements Initializable {
                 }
             } else {
                 allItemsInserted = false;
-                break;
+                showAlert("Error: The item " + item.getDrinkName() + " has insufficient stock!");
             }
         }
 
         if (allItemsInserted) {
             showAlert("✅ Order placed successfully!");
 
-            // Reset form
-            orderItems.clear();
-            orderItemsList.getChildren().clear();
-            orderTotalLabel.setText("Ksh 0");
-            totalOrderCost = 0.0;
-            customerChoiceBox.setValue(null);
+            resetOrder();
 
             // Reload orders list
             List<Order> ordersList = OrderDao.getAllOrders(searchField.getText());
@@ -470,9 +511,26 @@ public class DashboardController implements Initializable {
 
             showLowStockWarnings();
         } else {
-            showAlert("⚠️ Order saved but failed to save one or more items.");
+            showAlert("Order saved but failed to save one or more items.");
         }
     }
+
+    private void resetOrder() {
+        // Reset form
+        orderItems.clear();
+        orderItemsList.getChildren().clear();
+        orderTotalLabel.setText("Ksh 0");
+        totalOrderCost = 0.0;
+        customerChoiceBox.setValue(null);
+    }
+
+    // Cancel order
+    @FXML
+    private void cancelOrder(ActionEvent event) {
+        resetOrder();
+        showAlert("Order cancelled!");
+    }
+
     @FXML
     private void handleShowCustomerReport() {
         openReportScene("customer");
