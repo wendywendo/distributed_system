@@ -423,10 +423,9 @@ public class DashboardController implements Initializable, CustomerService {
                 stockService.deductStock(item.getDrinkId(), branchId, item.getQuantity());
             }
 
-
             if (allItemsInserted) {
                 showAlert("✅ Order placed successfully!");
-                resetOrderForm();
+                resetOrderForm(); // this now preserves selected customer
                 loadOrders(searchField.getText().trim());
                 showLowStockWarnings();
             } else {
@@ -439,7 +438,8 @@ public class DashboardController implements Initializable, CustomerService {
         }
     }
 
-//    load stocks from RMI
+
+    //    load stocks from RMI
 private void loadStocksFromRMI() {
     try {
         String currentBranch = Session.getBranchName(); // replace with your actual session class
@@ -544,7 +544,6 @@ private void showLowStockWarnings() {
         orderItemsList.getChildren().clear();
         orderTotalLabel.setText("Ksh 0");
         totalOrderCost = 0.0;
-        customerChoiceBox.setValue(null);
     }
 
     private void showAlert(String message) {
